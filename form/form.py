@@ -4,8 +4,24 @@ import fcntl
 import os
 import pkgutil
 import select
+import shlex
 import signal
+import subprocess
 import sys
+
+PY3 = sys.version_info[0] >= 3
+PY32 = sys.version_info >= (3, 2, 0)
+
+if not PY3:
+    # Python 2.*
+    def is_string(obj):
+        # Returns true if the given object is a string.
+        return isinstance(obj, basestring)
+else:
+    # Python 3.*
+    def is_string(obj):
+        # Returns true if the given object is a string.
+        return isinstance(obj, str)
 
 def get_data_path(package, resource):
     """Returns the full file path of a resource of a package."""
@@ -68,8 +84,11 @@ class BufferedReader:
 class FormLink:
     """A class for representing a connection to FORM."""
 
-    def __init__(self, path=None):
-        self._path = path
+    def __init__(self, args=None):
+        if isinstance(args, list):
+            self._args = tuple(args)  # Save as an immutable object.
+        else:
+            self._args = args
         self._childpid = None
         self._parentin = None
         self._parentout = None
@@ -82,12 +101,17 @@ class FormLink:
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
 
-    def open(self, path=None):
+    def open(self, args=None):
         """Opens a connection to a FORM process."""
-        if path is None:
-            path = self._path
-        if path is None:
-            path = 'form'
+        if args is None:
+            args = self._args
+        if args is None:
+            args = 'form'
+
+        if is_string(args):
+            args = shlex.split(args)  # Split the arguments.
+        elif isinstance(args, (list, tuple)):
+            args = list(args)  # As a modifiable mutable object.
 
         self.close()
 
@@ -142,10 +166,16 @@ class FormLink:
             os.close(fd_loggingin)
             os.dup2(fd_loggingout, sys.__stdout__.fileno())
 
-            os.system('{0} -q -pipe {1},{2} {3}'.format(path,
-                                                        fd_childin,
-                                                        fd_childout,
-                                                        INIT_FRM))
+            args.append('-q')
+            args.append('-pipe')
+            args.append('{0},{1}'.format(fd_childin, fd_childout))
+            args.append(INIT_FRM)
+
+            if not PY32:
+                subprocess.call(args, shell=False)
+            else:
+                subprocess.call(args, shell=False,
+                                pass_fds=(fd_childin, fd_childout, fd_loggingout))
 
             os.close(fd_childin)
             os.close(fd_childout)
@@ -230,6 +260,6 @@ class FormLink:
         else:
             return tuple(result)
 
-def open(path=None):
+def open(args=None):
     """Opens a connection to FORM and returns a link object."""
-    return FormLink(path)
+    return FormLink(args)
