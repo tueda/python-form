@@ -45,7 +45,7 @@ def set_nonblock(fd):
                 fcntl.F_SETFL,
                 fcntl.fcntl(fd, fcntl.F_GETFL) | os.O_NONBLOCK)
 
-class BufferedReader:
+class BufferedReader(object):
     """A wrapper class of file objects for buffered reading."""
 
     def __init__(self, f):
@@ -87,21 +87,18 @@ class BufferedReader:
         self._buf = ''
         return s
 
-class FormLink:
+class FormLink(object):
     """A class for representing a connection to FORM."""
 
     def __init__(self, args=None):
-        if isinstance(args, list):
-            self._args = tuple(args)  # Save as an immutable object.
-        else:
-            self._args = args
+        self._closed = True
         self._childpid = None
         self._parentin = None
         self._parentout = None
         self._loggingin = None
+        self.open(args)
 
     def __enter__(self):
-        self.open()
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
@@ -109,8 +106,6 @@ class FormLink:
 
     def open(self, args=None):
         """Opens a connection to a FORM process."""
-        if args is None:
-            args = self._args
         if args is None:
             args = 'form'
 
@@ -161,6 +156,8 @@ class FormLink:
             set_nonblock(fd_loggingin)
             parentin = BufferedReader(parentin)
             loggingin = BufferedReader(loggingin)
+
+            self._closed = False
             self._childpid = pid
             self._parentin = parentin
             self._parentout = parentout
@@ -190,7 +187,7 @@ class FormLink:
 
     def close(self):
         """Closes the connection to a FORM process established by open()."""
-        if self._childpid:
+        if not self._closed:
             self._parentout.write('\n\n')
             self._parentout.flush()
             # XXX: better to use waitpid for a little while?
@@ -198,6 +195,8 @@ class FormLink:
             self._parentout.close()
             self._loggingin.close()
             os.kill(self._childpid, signal.SIGKILL)
+
+            self._closed = True
             self._childpid = None
             self._parentin = None
             self._parentout = None
@@ -205,8 +204,8 @@ class FormLink:
 
     def write(self, script):
         """Sends the script to FORM."""
-        if not self._childpid:
-            raise IOError('not initialized yet')
+        if self._closed:
+            raise IOError('tried to write to closed connection')
         script = script.strip()
         if script:
             self._parentout.write(script)
@@ -214,8 +213,8 @@ class FormLink:
 
     def read(self, *names):
         """Waits for a response of FORM to obtain the results."""
-        if not self._childpid:
-            raise IOError('not initialized yet')
+        if self._closed:
+            raise IOError('tried to read from closed connection')
 
         END_MARK = '__END__'
         END_MARK_LEN = len(END_MARK)
@@ -263,6 +262,11 @@ class FormLink:
             return result[0]
         else:
             return tuple(result)
+
+    @property
+    def closed(self):
+        """Returns true if the connection is closed."""
+        return self._closed
 
 def open(args=None):
     """Opens a connection to FORM and returns a link object."""
