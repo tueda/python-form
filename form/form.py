@@ -9,10 +9,10 @@ import signal
 import subprocess
 import sys
 
-PY3 = sys.version_info[0] >= 3
-PY32 = sys.version_info >= (3, 2, 0)
+_PY3 = sys.version_info[0] >= 3
+_PY32 = sys.version_info >= (3, 2, 0)
 
-if not PY3:
+if not _PY3:
     # Python 2.*
     def is_string(obj):
         """Returns true if the given object is a string."""
@@ -35,9 +35,6 @@ def get_data_path(package, resource):
     parts.insert(0, os.path.dirname(mod.__file__))
     resource_name = os.path.join(*parts)
     return resource_name
-
-# The input file for FORM.
-INIT_FRM = get_data_path('form', 'init.frm')
 
 def set_nonblock(fd):
     """Sets the non-block descriptor flag for the given file descriptor."""
@@ -89,6 +86,9 @@ class BufferedReader(object):
 
 class FormLink(object):
     """A class for representing a connection to FORM."""
+
+    # The input file for FORM.
+    _INIT_FRM = get_data_path('form', 'init.frm')
 
     def __init__(self, args=None):
         self._closed = True
@@ -172,9 +172,9 @@ class FormLink(object):
             args.append('-q')
             args.append('-pipe')
             args.append('{0},{1}'.format(fd_childin, fd_childout))
-            args.append(INIT_FRM)
+            args.append(FormLink._INIT_FRM)
 
-            if not PY32:
+            if not _PY32:
                 subprocess.call(args, shell=False)
             else:
                 subprocess.call(args, shell=False,
