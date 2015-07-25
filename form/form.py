@@ -15,12 +15,12 @@ PY32 = sys.version_info >= (3, 2, 0)
 if not PY3:
     # Python 2.*
     def is_string(obj):
-        # Returns true if the given object is a string.
+        """Returns true if the given object is a string."""
         return isinstance(obj, basestring)
 else:
     # Python 3.*
     def is_string(obj):
-        # Returns true if the given object is a string.
+        """Returns true if the given object is a string."""
         return isinstance(obj, str)
 
 def get_data_path(package, resource):
@@ -36,7 +36,7 @@ def get_data_path(package, resource):
     resource_name = os.path.join(*parts)
     return resource_name
 
-"""The input file for FORM."""
+# The input file for FORM.
 INIT_FRM = get_data_path('form', 'init.frm')
 
 def set_nonblock(fd):
@@ -80,6 +80,12 @@ class BufferedReader:
         """Pushes back the given string to the buffer that is used for the next
         read()."""
         self._buf = s + self._buf
+
+    def read_buffer(self):
+        """Reads the pushed-back data."""
+        s = self._buf
+        self._buf = ''
+        return s
 
 class FormLink:
     """A class for representing a connection to FORM."""
@@ -225,9 +231,15 @@ class FormLink:
         self._parentout.flush()
 
         result = []
-        out = ''
+        out = self._parentin.read_buffer()
         for e in names:
             while True:
+                i = out.find(END_MARK)
+                if i >= 0:
+                    result.append(out[:i])
+                    out = out[i+END_MARK_LEN:]
+                    break
+
                 r, _, _ = select.select((self._parentin, self._loggingin),
                                         (), ())
                 if self._loggingin in r:
@@ -235,21 +247,13 @@ class FormLink:
                     if s:
                         i = s.rfind('\n')
                         if i >= 0:
-                            ss = s[:i].split('\n')
-                            for msg in ss:
+                            for msg in s[:i].split('\n'):
                                 if msg.find('-->') >= 0 or msg.find('==>') >= 0:
                                     self.close()
                                     raise RuntimeError(msg)
                         self._loggingin.unread(s[i+1:])
                 if self._parentin in r:
-                    s = self._parentin.read().replace('\n', '').replace(' ', '')
-                    if s:
-                        out += s
-                        i = out.find(END_MARK)
-                        if i >= 0:
-                            result.append(out[:i])
-                            out = out[i+END_MARK_LEN:]
-                            break
+                    out += self._parentin.read().replace('\n', '').replace(' ', '')
 
         self._parentin.unread(out)
 
