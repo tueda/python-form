@@ -252,7 +252,7 @@ class FormLink(object):
         """
         if self._closed:
             raise IOError('tried to flush closed connection')
-        self._parentout.write('#fromexternal\n\n')
+        self._parentout.write('#redefine FORMLINKLOOPVAR "0"\n\n')
         self._parentout.flush()
 
     def read(self, *names):
@@ -279,7 +279,7 @@ class FormLink(object):
                 self._parentout.write('#toexternal "%${1}", {0}\n'.format(e, END_MARK))
             else:
                 self._parentout.write('#toexternal "%E{1}", {0}\n'.format(e, END_MARK))
-        self._parentout.write('#fromexternal\n\n')
+        self._parentout.write('#redefine FORMLINKLOOPVAR "0"\n\n')
         self._parentout.flush()
 
         result = []

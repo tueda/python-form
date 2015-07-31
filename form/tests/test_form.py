@@ -100,5 +100,18 @@ class FormTestCase(unittest.TestCase):
             ''')
             self.assertRaises(RuntimeError, f.read, "G")
 
+    def test_many_times(self):
+        with form.open() as f:
+            n = 2000
+            f.write('''
+                #$x = 0;
+            ''')
+            for i in range(n):
+                f.write('''
+                    #$x = $x + 1;
+                ''')
+                f.read('$x')
+            self.assertEqual(int(f.read('$x')), n)
+
 if __name__ == '__main__':
     unittest.main()

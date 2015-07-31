@@ -10,5 +10,7 @@ Off finalstats;
 #endif
 #setexternal `PIPE1_';
 #toexternal "OK"
-#fromexternal
+#do FORMLINKLOOPVAR=1,1
+  #fromexternal
+#enddo
 .end
