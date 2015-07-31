@@ -37,7 +37,7 @@ class FormTestCase(unittest.TestCase):
             ''')
             str_FF = f.read('F1', 'F2')
 
-        self.assertEqual(str_FF, ('1+2*x+x^2', '1-2*x+x^2'))
+        self.assertEqual(str_FF, ['1+2*x+x^2', '1-2*x+x^2'])
 
     def test_old_style(self):
         f = form.open()

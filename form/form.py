@@ -264,7 +264,7 @@ class FormLink(object):
         preprocessor variables ("`VAR'"). Note that the communication from FORM
         is done in the preprocessor of FORM (i.e., at compile-time), so one may
         need to write ".sort" to get the correct result. The return value is
-        a string, or a tuple of strings when multiple names are passed.
+        a string, or a list of strings when multiple names are passed.
         """
         if self._closed:
             raise IOError('tried to read from closed connection')
@@ -319,7 +319,7 @@ class FormLink(object):
         elif len(names) == 1:
             return result[0]
         else:
-            return tuple(result)
+            return result
 
     @property
     def closed(self):
