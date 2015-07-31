@@ -91,6 +91,7 @@ class FormLink(object):
     _INIT_FRM = get_data_path('form', 'init.frm')
 
     def __init__(self, args=None):
+        """Initializes a connection to a FORM process."""
         self._closed = True
         self._childpid = None
         self._parentin = None
@@ -105,7 +106,19 @@ class FormLink(object):
         self.close()
 
     def open(self, args=None):
-        """Opens a connection to a FORM process."""
+        """Opens a connection to FORM.
+
+        Opens a connection to a FORM process. The opened connection should be
+        closed by close(). Since open() is called from the initializer (or
+        form.open()), this can be guaranteed by use of the "with" statement:
+
+            with form.open() as formlink:
+                # use formlink ...
+
+        The optional argument "args" is for the FORM command, a string or
+        a sequence of strings. For example '/path/to/form' or ['tform', '-w4'].
+        The default value is 'form'.
+        """
         if args is None:
             args = 'form'
 
@@ -187,7 +200,11 @@ class FormLink(object):
             sys.exit()
 
     def close(self):
-        """Closes the connection to a FORM process established by open()."""
+        """Closes the connection to FORM.
+
+        Closes the connection to a FORM process established by open(). The user
+        should call this method after use of FormLink objects.
+        """
         if not self._closed:
             self._parentout.write('\n\n')
             self._parentout.flush()
@@ -204,7 +221,11 @@ class FormLink(object):
             self._loggingin = None
 
     def write(self, script):
-        """Sends the script to FORM."""
+        """Sends a script to FORM.
+
+        Writes the given script to the communication channel to FORM. FORM does
+        not execute the sent script until flush() or read() is called.
+        """
         if self._closed:
             raise IOError('tried to write to closed connection')
         script = script.strip()
@@ -212,8 +233,28 @@ class FormLink(object):
             self._parentout.write(script)
             self._parentout.write('\n')
 
+    def flush(self):
+        """Flushes the channel to FORM.
+
+        Flushes the communication channel to FORM and asks FORM to execute the
+        sent script.
+        """
+        if self._closed:
+            raise IOError('tried to flush closed connection')
+        self._parentout.write('#fromexternal\n\n')
+        self._parentout.flush()
+
     def read(self, *names):
-        """Waits for a response of FORM to obtain the results."""
+        """Reads results from FORM.
+
+        Asks FORM to execute the sent script and waits for a response of FORM to
+        obtain the results specified by the given names. The object to be read
+        from FORM are expressions (e.g., "F"), $-variables ("$x") and
+        preprocessor variables ("`VAR'"). Note that the communication from FORM
+        is done in the preprocessor of FORM (i.e., at compile-time), so one may
+        need to write ".sort" to get the correct result. The return value is
+        a string, or a tuple of strings when multiple names are passed.
+        """
         if self._closed:
             raise IOError('tried to read from closed connection')
 
