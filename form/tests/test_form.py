@@ -84,5 +84,21 @@ class FormTestCase(unittest.TestCase):
             f.flush()
             self.assertEqual(f.read("F"), str(N**M))
 
+    def test_errors(self):
+        with form.open() as f:
+            f.write('''
+                L F = (1+x)^2;
+                .sort
+            ''')
+            self.assertRaises(RuntimeError, f.read, "F")
+
+        with form.open() as f:
+            f.write('''
+                S x;
+                L F = (1+x)^2;
+                .sort
+            ''')
+            self.assertRaises(RuntimeError, f.read, "G")
+
 if __name__ == '__main__':
     unittest.main()

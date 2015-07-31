@@ -90,14 +90,15 @@ class FormLink(object):
     # The input file for FORM.
     _INIT_FRM = get_data_path('form', 'init.frm')
 
-    def __init__(self, args=None):
+    def __init__(self, args=None, keep_log=False):
         """Initializes a connection to a FORM process."""
         self._closed = True
+        self._log = None
         self._childpid = None
         self._parentin = None
         self._parentout = None
         self._loggingin = None
-        self.open(args)
+        self.open(args, keep_log)
 
     def __enter__(self):
         return self
@@ -105,7 +106,7 @@ class FormLink(object):
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
 
-    def open(self, args=None):
+    def open(self, args=None, keep_log=False):
         """Opens a connection to FORM.
 
         Opens a connection to a FORM process. The opened connection should be
@@ -118,6 +119,10 @@ class FormLink(object):
         The optional argument "args" is for the FORM command, a string or
         a sequence of strings. For example '/path/to/form' or ['tform', '-w4'].
         The default value is 'form'.
+
+        The other argument "keep_log" indicates the log from FORM is kept
+        and used as detailed information when an error occurs.
+        The default value is False.
         """
         if args is None:
             args = 'form'
@@ -171,6 +176,10 @@ class FormLink(object):
             loggingin = BufferedReader(loggingin)
 
             self._closed = False
+            if keep_log:
+                self._log = []
+            else:
+                self._log = None
             self._childpid = pid
             self._parentin = parentin
             self._parentout = parentout
@@ -182,7 +191,8 @@ class FormLink(object):
             os.close(fd_loggingin)
             os.dup2(fd_loggingout, sys.__stdout__.fileno())
 
-            args.append('-q')
+            if not keep_log:
+                args.append('-q')
             args.append('-M')
             args.append('-pipe')
             args.append('{0},{1}'.format(fd_childin, fd_childout))
@@ -215,6 +225,7 @@ class FormLink(object):
             os.kill(self._childpid, signal.SIGKILL)
 
             self._closed = True
+            self._log = None
             self._childpid = None
             self._parentin = None
             self._parentout = None
@@ -289,7 +300,12 @@ class FormLink(object):
                         i = s.rfind('\n')
                         if i >= 0:
                             for msg in s[:i].split('\n'):
+                                if not self._log is None:
+                                    self._log.append(msg)
                                 if msg.find('-->') >= 0 or msg.find('==>') >= 0:
+                                    if self._log:
+                                        msg += '\n'
+                                        msg += '\n'.join(self._log)
                                     self.close()
                                     raise RuntimeError(msg)
                         self._loggingin.unread(s[i+1:])
@@ -310,6 +326,6 @@ class FormLink(object):
         """Returns true if the connection is closed."""
         return self._closed
 
-def open(args=None):
+def open(args=None, keep_log=False):
     """Opens a connection to FORM and returns a link object."""
-    return FormLink(args)
+    return FormLink(args, keep_log)
