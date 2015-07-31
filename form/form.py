@@ -170,6 +170,7 @@ class FormLink(object):
             os.dup2(fd_loggingout, sys.__stdout__.fileno())
 
             args.append('-q')
+            args.append('-M')
             args.append('-pipe')
             args.append('{0},{1}'.format(fd_childin, fd_childout))
             args.append(FormLink._INIT_FRM)
