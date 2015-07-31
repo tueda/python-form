@@ -9,6 +9,7 @@ python:
 
 install:
   - pip install .
+  - pip install coveralls
 
 before_script:
   - wget https://github.com/vermaseren/form/releases/download/v4.1-20131025/form-4.1-x86_64-linux.tar.gz
@@ -16,7 +17,10 @@ before_script:
   - export PATH=$PATH:$PWD/form-4.1-x86_64-linux/
 
 script:
-  - nosetests
+  - nosetests --with-coverage --cover-package=form
+
+after_success:
+  - coveralls
 
 notifications:
   email: false

@@ -6,6 +6,9 @@ A Python package for communicating with FORM.
 .. image:: https://travis-ci.org/tueda/python-form.svg?branch=master
     :target: https://travis-ci.org/tueda/python-form
 
+.. image:: https://coveralls.io/repos/tueda/python-form/badge.svg?branch=master&service=github
+  :target: https://coveralls.io/github/tueda/python-form?branch=master
+
 This package provides a mechanism to embed FORM_ [1]_ [2]_ [3]_ programs in
 Python code. The basic idea of the implementation is the same as FormLink_ [4]_:
 it utilizes unnamed pipes between FORM and an external program [5]_. It is
