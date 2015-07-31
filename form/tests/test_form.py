@@ -35,9 +35,9 @@ class FormTestCase(unittest.TestCase):
                 L F2 = (1-x)^2;
                 .sort
             ''')
-            str_FF = f.read('F1', 'F2')
-
-        self.assertEqual(str_FF, ['1+2*x+x^2', '1-2*x+x^2'])
+            self.assertEqual(f.read(), None)
+            self.assertEqual(f.read('F1', 'F2'),
+                             ['1+2*x+x^2', '1-2*x+x^2'])
 
     def test_old_style(self):
         f = form.open()
@@ -100,6 +100,12 @@ class FormTestCase(unittest.TestCase):
             ''')
             self.assertRaises(RuntimeError, f.read, "G")
 
+        with form.open() as f:
+            f.close()
+            self.assertRaises(IOError, f.write, '')
+            self.assertRaises(IOError, f.flush)
+            self.assertRaises(IOError, f.read)
+
     def test_many_times(self):
         with form.open() as f:
             n = 2000
@@ -112,6 +118,35 @@ class FormTestCase(unittest.TestCase):
                 ''')
                 f.read('$x')
             self.assertEqual(int(f.read('$x')), n)
+
+    def test_keep_log(self):
+        with form.open() as f:
+            msg = None
+            f.write('''
+                On stats;
+                S x;
+                L F = (1+x)^2;
+                .sort
+            ''')
+            try:
+                f.read('G')
+            except RuntimeError as e:
+                msg = str(e)
+            self.assertTrue(msg is not None and msg.find('L F = (1+x)^2;') < 0)
+
+        with form.open(keep_log=True) as f:
+            msg = None
+            f.write('''
+                On stats;
+                S x;
+                L F = (1+x)^2;
+                .sort
+            ''')
+            try:
+                f.read('G')
+            except RuntimeError as e:
+                msg = str(e)
+            self.assertTrue(msg is not None and msg.find('L F = (1+x)^2;') >= 0)
 
 if __name__ == '__main__':
     unittest.main()
