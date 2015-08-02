@@ -5,7 +5,6 @@ import os
 import pkgutil
 import select
 import shlex
-import signal
 import subprocess
 import sys
 
@@ -152,7 +151,7 @@ class FormLink(object):
             # FORM sends 'pid\n'.
             s = parentin.readline()
             if not s:
-                os.kill(pid, signal.SIGKILL)
+                os.waitpid(pid, 0)
                 parentin.close()
                 parentout.close()
                 loggingin.close()
@@ -164,7 +163,7 @@ class FormLink(object):
             # FORM sends 'OK' (in init.frm).
             s = parentin.read(2)
             if s != 'OK':
-                os.kill(pid, signal.SIGKILL)
+                os.waitpid(pid, 0)
                 parentin.close()
                 parentout.close()
                 loggingin.close()
@@ -207,7 +206,7 @@ class FormLink(object):
             os.close(fd_childin)
             os.close(fd_childout)
             os.close(fd_loggingout)
-            sys.exit()
+            os._exit(0)
 
     def close(self):
         """Closes the connection to FORM.
@@ -218,11 +217,10 @@ class FormLink(object):
         if not self._closed:
             self._parentout.write('\n\n')
             self._parentout.flush()
-            # XXX: better to use waitpid for a little while?
+            os.waitpid(self._childpid, 0)
             self._parentin.close()
             self._parentout.close()
             self._loggingin.close()
-            os.kill(self._childpid, signal.SIGKILL)
 
             self._closed = True
             self._log = None
