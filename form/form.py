@@ -298,14 +298,15 @@ class FormLink(object):
                         i = s.rfind('\n')
                         if i >= 0:
                             for msg in s[:i].split('\n'):
-                                if not self._log is None:
-                                    self._log.append(msg)
                                 if msg.find('-->') >= 0 or msg.find('==>') >= 0:
                                     if self._log:
                                         msg += '\n'
                                         msg += '\n'.join(self._log)
+                                        msg += '\n' + s[:i]
                                     self.close()
                                     raise RuntimeError(msg)
+                            if not self._log is None:
+                                self._log.append(s[:i])
                         self._loggingin.unread(s[i+1:])
                 if self._parentin in r:
                     out += self._parentin.read().replace('\n', '').replace(' ', '')
