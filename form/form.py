@@ -263,9 +263,29 @@ class FormLink(object):
         is done in the preprocessor of FORM (i.e., at compile-time), so one may
         need to write ".sort" to get the correct result. The return value is
         a string, or a list of strings when multiple names are passed.
+
+        If non-string objects are passed, they are considered as sequences, and
+        the return value becomes the list corresponding to the arguments. If
+        a sequence is passed as the argument to this method, it guarantees that
+        the return value is always a list:
+          fl.read(['F1'])              --> ['a1']
+          fl.read(['F1', 'F2'])        --> ['a1', 'a2']
+          fl.read(['F1', 'F2', 'F3'])  --> ['a1', 'a2', 'a3']
+        A more complicated example is
+          fl.read('F1', ['F2', 'F3'])  --> ['a1', ['a2', 'a3']]
         """
         if self._closed:
             raise IOError('tried to read from closed connection')
+
+        if len(names) == 1 and not is_string(names[0]):
+            names = tuple(names[0])
+            if len(names) == 1:
+                return [self.read(*names)]  # Guarantee to return a list
+            else:
+                return self.read(*names)
+
+        if any(not is_string(x) for x in names):
+            return [self.read(x) for x in names]
 
         END_MARK = '__END__'
         END_MARK_LEN = len(END_MARK)

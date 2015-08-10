@@ -82,7 +82,7 @@ class FormTestCase(unittest.TestCase):
             f.flush()
             f.flush()
             f.flush()
-            self.assertEqual(f.read("F"), str(N**M))
+            self.assertEqual(f.read('F'), str(N**M))
 
     def test_errors(self):
         with form.open() as f:
@@ -90,7 +90,7 @@ class FormTestCase(unittest.TestCase):
                 L F = (1+x)^2;
                 .sort
             ''')
-            self.assertRaises(RuntimeError, f.read, "F")
+            self.assertRaises(RuntimeError, f.read, 'F')
 
         with form.open() as f:
             f.write('''
@@ -98,7 +98,7 @@ class FormTestCase(unittest.TestCase):
                 L F = (1+x)^2;
                 .sort
             ''')
-            self.assertRaises(RuntimeError, f.read, "G")
+            self.assertRaises(RuntimeError, f.read, 'G')
 
         with form.open() as f:
             f.close()
@@ -147,6 +147,40 @@ class FormTestCase(unittest.TestCase):
             except RuntimeError as e:
                 msg = str(e)
             self.assertTrue(msg is not None and msg.find('L F = (1+x)^2;') >= 0)
+
+    def test_seq_args(self):
+        with form.open() as f:
+            f.write('''
+                #do i=1,9
+                  L F`i' = `i';
+                #enddo
+                .sort
+            ''')
+            # normal arguments
+            self.assertEqual(f.read('F1'), '1')
+            self.assertEqual(f.read('F1', 'F2'), ['1', '2'])
+            self.assertEqual(f.read('F1', 'F2', 'F3'), ['1', '2', '3'])
+            # a non-string argument
+            self.assertEqual(f.read(('F1',)), ['1'])
+            self.assertEqual(f.read(('F1', 'F2')), ['1', '2'])
+            self.assertEqual(f.read(('F1', 'F2', 'F3')), ['1', '2', '3'])
+            # a generator
+            self.assertEqual(f.read('F{0}'.format(i) for i in range(1, 2)),
+                             ['1'])
+            self.assertEqual(f.read('F{0}'.format(i) for i in range(1, 3)),
+                             ['1', '2'])
+            self.assertEqual(f.read('F{0}'.format(i) for i in range(1, 4)),
+                             ['1', '2', '3'])
+            # more complicated arguments
+            self.assertEqual(f.read(['F1'], 'F2'), [['1'], '2'])
+            self.assertEqual(f.read(['F1'], ['F2']), [['1'], ['2']])
+            self.assertEqual(f.read('F1', ['F2', 'F3']), ['1', ['2', '3']])
+            self.assertEqual(f.read('F1', ['F2'], ['F3']), ['1', ['2'], ['3']])
+            self.assertEqual(f.read(['F1'], ['F2', ['F3', 'F4']]),
+                             [['1'], ['2', ['3', '4']]])
+            self.assertEqual(f.read('F1',
+                                    (('F{0}').format(i) for i in range(2, 5))),
+                             ['1', ['2', '3', '4']])
 
 if __name__ == '__main__':
     unittest.main()
