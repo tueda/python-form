@@ -182,5 +182,18 @@ class FormTestCase(unittest.TestCase):
                                     (('F{0}').format(i) for i in range(2, 5))),
                              ['1', ['2', '3', '4']])
 
+    def test_long_lines(self):
+        with form.open() as f:
+            f.write('''
+                L F = 2^1000;
+                #$x = 2^1000;
+                .sort
+                #define x "`$x'"
+            ''')
+            answer = str(2**1000);
+            self.assertEqual(f.read('F'), answer)
+            self.assertEqual(f.read('$x'), answer)
+            self.assertEqual(f.read("`x'"), answer)
+
 if __name__ == '__main__':
     unittest.main()

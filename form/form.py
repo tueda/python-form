@@ -329,7 +329,10 @@ class FormLink(object):
                                 self._log.append(s[:i])
                         self._loggingin.unread(s[i+1:])
                 if self._parentin in r:
-                    out += self._parentin.read().replace('\n', '').replace(' ', '')
+                    out += (self._parentin.read()
+                            .replace('\n', '')
+                            .replace('\\', '')
+                            .replace(' ', ''))
 
         self._parentin.unread(out)
 
