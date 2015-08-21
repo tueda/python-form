@@ -89,6 +89,11 @@ class FormLink(object):
     # The input file for FORM.
     _INIT_FRM = get_data_path('form', 'init.frm')
 
+    # Special keywords for communicating with FORM.
+    _END_MARK = '__END__'
+    _END_MARK_LEN = len(_END_MARK)
+    _PROMPT = '\n__READY__\n'
+
     def __init__(self, args=None, keep_log=False):
         """Initializes a connection to a FORM process."""
         self._closed = True
@@ -168,6 +173,8 @@ class FormLink(object):
                 parentout.close()
                 loggingin.close()
                 raise IOError('failed to establish the connection to FORM')
+            # Change the prompt.
+            parentout.write('#prompt {0}\n'.format(self._PROMPT.strip()))
 
             set_nonblock(fd_parentin)
             set_nonblock(fd_loggingin)
@@ -201,7 +208,9 @@ class FormLink(object):
                 subprocess.call(args, shell=False)
             else:
                 subprocess.call(args, shell=False,
-                                pass_fds=(fd_childin, fd_childout, fd_loggingout))
+                                pass_fds=(fd_childin,
+                                          fd_childout,
+                                          fd_loggingout))
 
             os.close(fd_childin)
             os.close(fd_childout)
@@ -215,7 +224,7 @@ class FormLink(object):
         should call this method after use of FormLink objects.
         """
         if not self._closed:
-            self._parentout.write('\n\n')
+            self._parentout.write(self._PROMPT)
             self._parentout.flush()
             os.waitpid(self._childpid, 0)
             self._parentin.close()
@@ -232,8 +241,9 @@ class FormLink(object):
     def write(self, script):
         """Sends a script to FORM.
 
-        Writes the given script to the communication channel to FORM. FORM does
-        not execute the sent script until flush() or read() is called.
+        Writes the given script to the communication channel to FORM. It could
+        be buffered and so FORM may not execute the sent script until flush() or
+        read() is called.
         """
         if self._closed:
             raise IOError('tried to write to closed connection')
@@ -245,12 +255,10 @@ class FormLink(object):
     def flush(self):
         """Flushes the channel to FORM.
 
-        Flushes the communication channel to FORM and asks FORM to execute the
-        sent script.
+        Flushes the communication channel to FORM.
         """
         if self._closed:
             raise IOError('tried to flush closed connection')
-        self._parentout.write('#redefine FORMLINKLOOPVAR "0"\n\n')
         self._parentout.flush()
 
     def read(self, *names):
@@ -287,27 +295,25 @@ class FormLink(object):
         if any(not is_string(x) for x in names):
             return [self.read(x) for x in names]
 
-        END_MARK = '__END__'
-        END_MARK_LEN = len(END_MARK)
-
         for e in names:
             if len(e) > 0 and e[0] == '`' and e[-1] == "'":
-                self._parentout.write('#toexternal "{0}{1}"\n'.format(e, END_MARK))
+                self._parentout.write('#toexternal "{0}{1}"\n'.format(e, self._END_MARK))
             elif len(e) > 0 and e[0] == '$':
-                self._parentout.write('#toexternal "%${1}", {0}\n'.format(e, END_MARK))
+                self._parentout.write('#toexternal "%${1}", {0}\n'.format(e, self._END_MARK))
             else:
-                self._parentout.write('#toexternal "%E{1}", {0}\n'.format(e, END_MARK))
-        self._parentout.write('#redefine FORMLINKLOOPVAR "0"\n\n')
+                self._parentout.write('#toexternal "%E{1}", {0}\n'.format(e, self._END_MARK))
+        self._parentout.write('#redefine FORMLINKLOOPVAR "0"')
+        self._parentout.write(self._PROMPT)
         self._parentout.flush()
 
         result = []
         out = self._parentin.read_buffer()
         for e in names:
             while True:
-                i = out.find(END_MARK)
+                i = out.find(self._END_MARK)
                 if i >= 0:
                     result.append(out[:i])
-                    out = out[i+END_MARK_LEN:]
+                    out = out[i+self._END_MARK_LEN:]
                     break
 
                 r, _, _ = select.select((self._parentin, self._loggingin),

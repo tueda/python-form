@@ -195,5 +195,19 @@ class FormTestCase(unittest.TestCase):
             self.assertEqual(f.read('$x'), answer)
             self.assertEqual(f.read("`x'"), answer)
 
+    def test_empty_lines(self):
+        with form.open() as f:
+            f.write('''
+                On stats;
+
+                S x;
+
+                L F = (1+x)^2;
+
+
+                .sort
+            ''')
+            self.assertEqual(f.read('F'), '1+2*x+x^2')
+
 if __name__ == '__main__':
     unittest.main()
