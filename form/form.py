@@ -1,5 +1,6 @@
 """A module to run FORM programs from Python."""
 
+import errno
 import fcntl
 import os
 import pkgutil
@@ -224,19 +225,29 @@ class FormLink(object):
         should call this method after use of FormLink objects.
         """
         if not self._closed:
-            self._parentout.write(self._PROMPT)
-            self._parentout.flush()
-            os.waitpid(self._childpid, 0)
-            self._parentin.close()
-            self._parentout.close()
-            self._loggingin.close()
-
-            self._closed = True
-            self._log = None
-            self._childpid = None
-            self._parentin = None
-            self._parentout = None
-            self._loggingin = None
+            try:
+                # We ignore broken pipes.
+                try:
+                    self._parentout.write(self._PROMPT)
+                    self._parentout.flush()
+                except IOError as e:
+                    if e.errno != errno.EPIPE:
+                        raise
+                os.waitpid(self._childpid, 0)
+                self._parentin.close()
+                try:
+                    self._parentout.close()
+                except IOError as e:
+                    if e.errno != errno.EPIPE:
+                        raise
+                self._loggingin.close()
+            finally:
+                self._closed = True
+                self._log = None
+                self._childpid = None
+                self._parentin = None
+                self._parentout = None
+                self._loggingin = None
 
     def write(self, script):
         """Sends a script to FORM.
