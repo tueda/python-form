@@ -307,12 +307,35 @@ class FormLink(object):
             return [self.read(x) for x in names]
 
         for e in names:
-            if len(e) > 0 and e[0] == '`' and e[-1] == "'":
+            if len(e) >= 2 and e[0] == '`' and e[-1] == "'":
                 self._parentout.write('#toexternal "{0}{1}"\n'.format(e, self._END_MARK))
-            elif len(e) > 0 and e[0] == '$':
-                self._parentout.write('#toexternal "%${1}", {0}\n'.format(e, self._END_MARK))
+            elif len(e) >= 3 and e[0] == '$' and e[-2:] == '[]':
+                # Special syntax "$x[]" for factorized $-variables.
+                # NOTE: (1) isfactorized($x) is zero when $x is 0 or $x has only
+                #           one factor even after FactArg is performed.
+                #       (2) `$x[0]' is accessible even if FactArg has not been
+                #           performed. Use `$x[0]' rather than isfactorized($x).
+                #       (3) `$x[1]' is not accesible (segfault) when $x has only
+                #           one factor and so `$x[0]' gives 1.
+                self._parentout.write((
+                    "#if `${0}[0]'\n"
+                    "#toexternal \"(%$)\",${0}[1]\n"
+                    "#do i=2,`${0}[0]'\n"
+                    "#toexternal \"*(%$)\",${0}[`i']\n"
+                    "#enddo\n"
+                    "#else\n"
+                    "#if termsin(${0})\n"
+                    "#toexternal \"%$\",${0}\n"
+                    "#else\n"
+                    "#toexternal \"(0)\"\n"
+                    "#endif\n"
+                    "#endif\n"
+                    "#toexternal \"{1}\"\n"
+                    ).format(e[1:-2], self._END_MARK))
+            elif len(e) >= 1 and e[0] == '$':
+                self._parentout.write('#toexternal "%${1}",{0}\n'.format(e, self._END_MARK))
             else:
-                self._parentout.write('#toexternal "%E{1}", {0}\n'.format(e, self._END_MARK))
+                self._parentout.write('#toexternal "%E{1}",{0}\n'.format(e, self._END_MARK))
         self._parentout.write('#redefine FORMLINKLOOPVAR "0"')
         self._parentout.write(self._PROMPT)
         self._parentout.flush()
