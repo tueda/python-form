@@ -1,5 +1,6 @@
 """A module to run FORM programs from Python."""
 
+import collections
 import errno
 import fcntl
 import os
@@ -121,12 +122,13 @@ class FormLink(object):
             with form.open() as formlink:
                 # use formlink ...
 
-        The optional argument "args" is for the FORM command, a string or
+        The optional argument `args` is for the FORM command, a string or
         a sequence of strings. For example '/path/to/form' or ['tform', '-w4'].
         The default value is 'form'.
 
-        The other argument "keep_log" indicates the log from FORM is kept
-        and used as detailed information when an error occurs.
+        The other argument `keep_log` indicates the log from FORM is kept
+        and used as detailed information when an error occurs. If its value
+        is >= 2, it specifies the maximum number of lines for the scrollback.
         The default value is False.
         """
         if args is None:
@@ -184,7 +186,10 @@ class FormLink(object):
 
             self._closed = False
             if keep_log:
-                self._log = []
+                if keep_log >= 2:
+                    self._log = collections.deque(maxlen=keep_log)
+                else:
+                    self._log = []
             else:
                 self._log = None
             self._childpid = pid
@@ -357,16 +362,16 @@ class FormLink(object):
                     if s:
                         i = s.rfind('\n')
                         if i >= 0:
-                            for msg in s[:i].split('\n'):
+                            msgs = s[:i].split('\n')
+                            if self._log is not None:
+                                self._log.extend(msgs)
+                            for msg in msgs:
                                 if msg.find('-->') >= 0 or msg.find('==>') >= 0:
                                     if self._log:
                                         msg += '\n'
                                         msg += '\n'.join(self._log)
-                                        msg += '\n' + s[:i]
                                     self.close()
                                     raise RuntimeError(msg)
-                            if not self._log is None:
-                                self._log.append(s[:i])
                         self._loggingin.unread(s[i+1:])
                 if self._parentin in r:
                     out += (self._parentin.read()

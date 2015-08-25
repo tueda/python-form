@@ -120,33 +120,69 @@ class FormTestCase(unittest.TestCase):
             self.assertEqual(int(f.read('$x')), n)
 
     def test_keep_log(self):
+        script = '''
+            On stats;
+            S x;
+            L F = (1+x)^2;
+            ;* 1
+            ;* 2
+            ;* 3
+            ;* 4
+            ;* 5
+            ;* 6
+            ;* 7
+            ;* 8
+            ;* 9
+            ;* 10
+            L G = (1-x)^2;
+            ;* 1
+            ;* 2
+            ;* 3
+            ;* 4
+            ;* 5
+            ;* 6
+            ;* 7
+            ;* 8
+            ;* 9
+            ;* 10
+            .sort
+        '''
+
         with form.open() as f:
             msg = None
-            f.write('''
-                On stats;
-                S x;
-                L F = (1+x)^2;
-                .sort
-            ''')
+            f.write(script)
             try:
-                f.read('G')
+                f.read('X')
             except RuntimeError as e:
                 msg = str(e)
-            self.assertTrue(msg is not None and msg.find('L F = (1+x)^2;') < 0)
+            self.assertTrue(msg is not None)
+            # Neither F nor G appears in `msg`.
+            self.assertTrue(msg.find('L F = (1+x)^2;') < 0)
+            self.assertTrue(msg.find('L G = (1-x)^2;') < 0)
 
         with form.open(keep_log=True) as f:
             msg = None
-            f.write('''
-                On stats;
-                S x;
-                L F = (1+x)^2;
-                .sort
-            ''')
+            f.write(script)
             try:
-                f.read('G')
+                f.read('X')
             except RuntimeError as e:
                 msg = str(e)
-            self.assertTrue(msg is not None and msg.find('L F = (1+x)^2;') >= 0)
+            self.assertTrue(msg is not None)
+            # Both F and G appear in `msg`.
+            self.assertTrue(msg.find('L F = (1+x)^2;') >= 0)
+            self.assertTrue(msg.find('L G = (1-x)^2;') >= 0)
+
+        with form.open(keep_log=30) as f:
+            msg = None
+            f.write(script)
+            try:
+                f.read('X')
+            except RuntimeError as e:
+                msg = str(e)
+            self.assertTrue(msg is not None)
+            # G is still in `msg' but F is not.
+            self.assertTrue(msg.find('L F = (1+x)^2;') < 0)
+            self.assertTrue(msg.find('L G = (1-x)^2;') >= 0)
 
     def test_seq_args(self):
         with form.open() as f:
