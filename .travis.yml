@@ -19,7 +19,7 @@ before_script:
   - export PATH=$PATH:$PWD/form-4.1-x86_64-linux/
 
 script:
-  - nosetests --with-coverage --cover-package=form
+  - nosetests --with-doctest --with-coverage --cover-package=form
 
 after_success:
   - coveralls

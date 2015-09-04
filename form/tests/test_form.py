@@ -293,6 +293,3 @@ class FormTestCase(unittest.TestCase):
                 #factdollar $w
             ''')
             self.assertEqual(f.read('$w[]'), '(2)*(a)')
-
-if __name__ == '__main__':
-    unittest.main()

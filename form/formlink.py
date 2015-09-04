@@ -1,92 +1,70 @@
-"""A module to run FORM programs from Python."""
-
 import collections
 import errno
 import fcntl
 import os
-import pkgutil
 import select
 import shlex
 import subprocess
 import sys
 
+from .datapath import get_data_path
+
 _PY3 = sys.version_info[0] >= 3
 _PY32 = sys.version_info >= (3, 2, 0)
 
 if not _PY3:
-    # Python 2.*
+    # Python 2
     def is_string(obj):
-        """Returns true if the given object is a string."""
+        """Return True if the given object is a string."""
         return isinstance(obj, basestring)
 else:
-    # Python 3.*
+    # Python 3
     def is_string(obj):
-        """Returns true if the given object is a string."""
+        """Return True if the given object is a string."""
         return isinstance(obj, str)
 
-def get_data_path(package, resource):
-    """Returns the full file path of a resource of a package."""
-    loader = pkgutil.get_loader(package)
-    if loader is None or not hasattr(loader, 'get_data'):
-        return None
-    mod = sys.modules.get(package) or loader.load_module(package)
-    if mod is None or not hasattr(mod, '__file__'):
-        return None
-    parts = resource.split('/')
-    parts.insert(0, os.path.dirname(mod.__file__))
-    resource_name = os.path.join(*parts)
-    return resource_name
-
 def set_nonblock(fd):
-    """Sets the non-block descriptor flag for the given file descriptor."""
+    """Set the given file descriptor to non-blocking mode."""
     fcntl.fcntl(fd,
                 fcntl.F_SETFL,
                 fcntl.fcntl(fd, fcntl.F_GETFL) | os.O_NONBLOCK)
 
-class BufferedReader(object):
-    """A wrapper class of file objects for buffered reading."""
+class PushbackReader(object):
+    """A wrapper class for streams that allows data to be pushed back into the
+       stream."""
 
-    def __init__(self, f):
-        self._f = f
+    def __init__(self, raw):
+        self._raw = raw
         self._buf = ''
 
     def close(self):
-        """Closes the file."""
-        self._f.close()
+        """Close the stream."""
+        self._raw.close()
 
     def fileno(self):
-        """Returns the file descriptor."""
-        return self._f.fileno()
+        """Return the file descriptor."""
+        return self._raw.fileno()
 
-    def read(self, size=None):
-        """Reads from the file."""
-        if size is None or size < 0:
-            s = self._buf + self._f.read()
-            self._buf = ''
-            return s
-        else:
-            if size <= len(self._buf):
-                s = self._buf[:size]
-                self._buf = self._buf[size:]
-                return s
-            else:
-                s = self._buf + self._f.read(size - len(self._buf))
-                self._buf = ''
-                return s
+    def read(self):
+        """Read data from the stream."""
+        s = self._buf + self._raw.read()
+        self._buf = ''
+        return s
 
     def unread(self, s):
-        """Pushes back the given string to the buffer that is used for the next
-        read()."""
+        """Push back the given string to the internal buffer, which will be used
+           for the next `read()` or `read0()`."""
         self._buf = s + self._buf
 
-    def read_buffer(self):
-        """Reads the pushed-back data."""
+    def read0(self):
+        """Read the pushed-back data. No call to the underlying raw stream's
+           `read()`."""
         s = self._buf
         self._buf = ''
         return s
 
 class FormLink(object):
-    """A class for representing a connection to FORM."""
+    """An object representing a connection to FORM."""
 
     # The input file for FORM.
     _INIT_FRM = get_data_path('form', 'init.frm')
@@ -97,7 +75,7 @@ class FormLink(object):
     _PROMPT = '\n__READY__\n'
 
     def __init__(self, args=None, keep_log=False):
-        """Initializes a connection to a FORM process."""
+        """Initialize a connection to a FORM process."""
         self._closed = True
         self._log = None
         self._childpid = None
@@ -113,23 +91,29 @@ class FormLink(object):
         self.close()
 
     def open(self, args=None, keep_log=False):
-        """Opens a connection to FORM.
+        """Open a connection to FORM.
 
-        Opens a connection to a FORM process. The opened connection should be
-        closed by close(). Since open() is called from the initializer (or
-        form.open()), this can be guaranteed by use of the "with" statement:
+        Open a connection to a new FORM process. The opened connection should be
+        closed by `close()`. Since `open()` is called from the initializer (or
+        `form.open()`), this can be guaranteed by use of the "with" statement:
 
-            with form.open() as formlink:
-                # use formlink ...
+        >>> import form
+        >>> with form.open() as formlink:
+        ...     pass  # use formlink ...
 
         The optional argument `args` is for the FORM command, a string or
         a sequence of strings. For example '/path/to/form' or ['tform', '-w4'].
         The default value is 'form'.
 
-        The other argument `keep_log` indicates the log from FORM is kept
-        and used as detailed information when an error occurs. If its value
+        The other argument `keep_log` indicates whether the log from FORM is
+        kept and used as detailed information when an error occurs. If the value
         is >= 2, it specifies the maximum number of lines for the scrollback.
         The default value is False.
+
+        Caveats
+        -------
+        In the current implementation, keep_log=True may cause a dead lock when
+        the listing of the input is enabled and very long input is sent to FORM.
         """
         if args is None:
             args = 'form'
@@ -181,8 +165,8 @@ class FormLink(object):
 
             set_nonblock(fd_parentin)
             set_nonblock(fd_loggingin)
-            parentin = BufferedReader(parentin)
-            loggingin = BufferedReader(loggingin)
+            parentin = PushbackReader(parentin)
+            loggingin = PushbackReader(loggingin)
 
             self._closed = False
             if keep_log:
@@ -224,10 +208,10 @@ class FormLink(object):
             os._exit(0)
 
     def close(self):
-        """Closes the connection to FORM.
+        """Close the connection to FORM.
 
-        Closes the connection to a FORM process established by open(). The user
-        should call this method after use of FormLink objects.
+        Close the connection to the FORM process established by `open()`. The
+        user should call this method after use of each FormLink object.
         """
         if not self._closed:
             try:
@@ -255,11 +239,11 @@ class FormLink(object):
                 self._loggingin = None
 
     def write(self, script):
-        """Sends a script to FORM.
+        """Send a script to FORM.
 
-        Writes the given script to the communication channel to FORM. It could
-        be buffered and so FORM may not execute the sent script until flush() or
-        read() is called.
+        Write the given script to the communication channel to FORM. It could
+        be buffered and so FORM may not execute the sent script until `flush()`
+        or `read()` is called.
         """
         if self._closed:
             raise IOError('tried to write to closed connection')
@@ -269,34 +253,63 @@ class FormLink(object):
             self._parentout.write('\n')
 
     def flush(self):
-        """Flushes the channel to FORM.
+        """Flush the channel to FORM.
 
-        Flushes the communication channel to FORM.
+        Flush the communication channel to FORM.
         """
         if self._closed:
             raise IOError('tried to flush closed connection')
         self._parentout.flush()
 
     def read(self, *names):
-        """Reads results from FORM.
+        """Read results from FORM.
 
-        Asks FORM to execute the sent script and waits for a response of FORM to
-        obtain the results specified by the given names. The object to be read
-        from FORM are expressions (e.g., "F"), $-variables ("$x") and
-        preprocessor variables ("`VAR'"). Note that the communication from FORM
-        is done in the preprocessor of FORM (i.e., at compile-time), so one may
-        need to write ".sort" to get the correct result. The return value is
-        a string, or a list of strings when multiple names are passed.
+        Wait for a response of FORM to obtain the results specified by the given
+        names and return a corresponding string or (nested) list of strings.
+        Objects to be read from FORM are expressions, $-variables and
+        preprocessor variables.
+
+        ========== =============================
+          name       meaning
+        ========== =============================
+          "F"        expression F
+          "$x"       $-variable $x
+          "$x[]"     factorized $-variable $x
+          "`A'"      preprocessor variable A
+        ========== =============================
+
+        Note that the communication for the reading is performed within the
+        preprocessor of FORM (i.e., at compile-time), so one may need to write
+        ".sort" to get the correct result.
 
         If non-string objects are passed, they are considered as sequences, and
         the return value becomes the list corresponding to the arguments. If
-        a sequence is passed as the argument to this method, it guarantees that
-        the return value is always a list:
-          fl.read(['F1'])              --> ['a1']
-          fl.read(['F1', 'F2'])        --> ['a1', 'a2']
-          fl.read(['F1', 'F2', 'F3'])  --> ['a1', 'a2', 'a3']
-        A more complicated example is
-          fl.read('F1', ['F2', 'F3'])  --> ['a1', ['a2', 'a3']]
+        a sequence is passed as the argument to this method, it is guaranteed
+        that the return value is always a list:
+
+        >>> import form
+        >>> f = form.open()
+        >>> f.write('''
+        ...     S a1,...,a3;
+        ...     L F1 = a1;
+        ...     L F2 = a2;
+        ...     L F3 = a3;
+        ...     .sort
+        ... ''')
+
+        >>> f.read(['F1'])
+        ['a1']
+        >>> f.read(['F1', 'F2'])
+        ['a1', 'a2']
+        >>> f.read(['F1', 'F2', 'F3'])
+        ['a1', 'a2', 'a3']
+
+        A more complicated example, which returns a nested list, is
+
+        >>> f.read('F1', ['F2', 'F3'])
+        ['a1', ['a2', 'a3']]
+
+        >>> f.close()
         """
         if self._closed:
             raise IOError('tried to read from closed connection')
@@ -304,7 +317,7 @@ class FormLink(object):
         if len(names) == 1 and not is_string(names[0]):
             names = tuple(names[0])
             if len(names) == 1:
-                return [self.read(*names)]  # Guarantee to return a list
+                return [self.read(*names)]  # Guarantee to return a list.
             else:
                 return self.read(*names)
 
@@ -320,8 +333,9 @@ class FormLink(object):
                 #           one factor even after FactArg is performed.
                 #       (2) `$x[0]' is accessible even if FactArg has not been
                 #           performed. Use `$x[0]' rather than isfactorized($x).
-                #       (3) `$x[1]' is not accesible (segfault) when $x has only
-                #           one factor and so `$x[0]' gives 1.
+                #       (3) `$x[1]' is not accessible (segfault) with versions
+                #           before Sep  3 2015, if $x has only one factor and
+                #           `$x[0]' gives 1.
                 self._parentout.write((
                     "#if `${0}[0]'\n"
                     "#toexternal \"(%$)\",${0}[1]\n"
@@ -346,7 +360,7 @@ class FormLink(object):
         self._parentout.flush()
 
         result = []
-        out = self._parentin.read_buffer()
+        out = self._parentin.read0()
         for e in names:
             while True:
                 i = out.find(self._END_MARK)
@@ -390,9 +404,5 @@ class FormLink(object):
 
     @property
     def closed(self):
-        """Returns true if the connection is closed."""
+        """Return True if the connection is closed."""
         return self._closed
-
-def open(args=None, keep_log=False):
-    """Opens a connection to FORM and returns a link object."""
-    return FormLink(args, keep_log)
