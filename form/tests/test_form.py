@@ -246,26 +246,37 @@ class FormTestCase(unittest.TestCase):
             self.assertEqual(f.read('F'), '1+2*x+x^2')
 
     def test_factdollar(self):
+        def join(factors):
+            return '({0})'.format(')*('.join(factors))
+
+        def check_factors(x, factors):
+            self.assertEqual(f.read('{0}[0]'.format(x)), str(len(factors)))
+            for i in range(len(factors)):
+                self.assertEqual(f.read('{0}[{1}]'.format(x, i + 1)),
+                                 factors[i])
+            self.assertEqual(f.read('{0}[]'.format(x)), join(factors))
+
         with form.open() as f:
+            # NOTE: The order of factors has been changed since Sep  3 2015.
             f.write('''
                 S a,b;
                 #$x = (-5)*(a^5-b^5);
                 #factdollar $x
             ''')
+            if f._dateversion >= 20150903:
+                factors = ('b-a', 'b^4+a*b^3+a^2*b^2+a^3*b+a^4', '5')
+            else:
+                factors = ('5', 'b-a', 'b^4+a*b^3+a^2*b^2+a^3*b+a^4')
             self.assertEqual(f.read('$x'), '5*b^5-5*a^5')
-            self.assertEqual(f.read('$x[0]'), '3')
-            self.assertEqual(f.read('$x[1]'), '5')
-            self.assertEqual(f.read('$x[2]'), 'b-a')
-            self.assertEqual(f.read('$x[3]'), 'b^4+a*b^3+a^2*b^2+a^3*b+a^4')
-            self.assertEqual(f.read('$x[]'),
-                             '(5)*(b-a)*(b^4+a*b^3+a^2*b^2+a^3*b+a^4)')
+            check_factors('$x', factors)
 
             f.write('''
                 S a,b;
                 #$x = (a+b)^3;
                 #factdollar $x
             ''')
-            self.assertEqual(f.read('$x[]'), '(b+a)*(b+a)*(b+a)')
+            factors = ('b+a', 'b+a', 'b+a')
+            check_factors('$x', factors)
 
             f.write('''
                 #$y = 0;
@@ -292,4 +303,8 @@ class FormTestCase(unittest.TestCase):
             f.write('''
                 #factdollar $w
             ''')
-            self.assertEqual(f.read('$w[]'), '(2)*(a)')
+            if f._dateversion >= 20150903:
+                factors = ('a', '2')
+            else:
+                factors = ('2', 'a')
+            check_factors('$w', factors)

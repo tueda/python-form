@@ -77,6 +77,7 @@ class FormLink(object):
     def __init__(self, args=None, keep_log=False):
         """Initialize a connection to a FORM process."""
         self._closed = True
+        self._head = None
         self._log = None
         self._childpid = None
         self._parentin = None
@@ -162,6 +163,8 @@ class FormLink(object):
                 raise IOError('failed to establish the connection to FORM')
             # Change the prompt.
             parentout.write('#prompt {0}\n'.format(self._PROMPT.strip()))
+            # Read the first line of the FORM output.
+            head = loggingin.readline().rstrip()
 
             set_nonblock(fd_parentin)
             set_nonblock(fd_loggingin)
@@ -169,13 +172,18 @@ class FormLink(object):
             loggingin = PushbackReader(loggingin)
 
             self._closed = False
+            self._head = head
             if keep_log:
                 if keep_log >= 2:
                     self._log = collections.deque(maxlen=keep_log)
+                    self._log.append(head)
                 else:
                     self._log = []
+                    self._log.append(head)
             else:
                 self._log = None
+                # Turn off the listing of the input.
+                parentout.write('#-\n')
             self._childpid = pid
             self._parentin = parentin
             self._parentout = parentout
@@ -187,8 +195,6 @@ class FormLink(object):
             os.close(fd_loggingin)
             os.dup2(fd_loggingout, sys.__stdout__.fileno())
 
-            if not keep_log:
-                args.append('-q')
             args.append('-M')
             args.append('-pipe')
             args.append('{0},{1}'.format(fd_childin, fd_childout))
@@ -232,6 +238,7 @@ class FormLink(object):
                 self._loggingin.close()
             finally:
                 self._closed = True
+                self._head = None
                 self._log = None
                 self._childpid = None
                 self._parentin = None
@@ -406,3 +413,35 @@ class FormLink(object):
     def closed(self):
         """Return True if the connection is closed."""
         return self._closed
+
+    @property
+    def head(self):
+        """Return the first line of the FORM output."""
+        return self._head
+
+    @property
+    def _dateversion(self):
+        import re
+        if self._head:
+            m = re.search(r'(?<=\()(.*)(?=\))', self._head)
+            if m:
+                dv = m.group(0)
+                s = dv.split()
+                if len(s) == 3:
+                    # month
+                    month_names = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec')
+                    if s[0] in month_names:
+                        m = month_names.index(s[0]) + 1
+                        # date
+                        if s[1].isdigit():
+                            d = int(s[1])
+                            if 1 <= d <= 31:
+                                # year
+                                if s[2].isdigit():
+                                    y = int(s[2])
+                                    if y >= 1:
+                                        # Return an integer as "yyyymmdd".
+                                        return y * 10000 + m * 100 + d
+            raise ValueError('failed to parse "{0}"'.format(self._head))
+        raise ValueError('no first line')
