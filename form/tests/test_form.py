@@ -316,38 +316,28 @@ class FormTestCase(unittest.TestCase):
         import time
 
         with form.open() as f:
-            f.write('''
-                Auto V p;
-                L F = g_(0,p1,...,p30);
-                trace4,0;
-                .sort
-            ''')
-            f.flush()
-            time.sleep(1)
-
             def timeout_handler(signum, frame):
                 raise RuntimeError('Timeout')
 
-            signal.signal(signal.SIGALRM, timeout_handler)
-            signal.alarm(5)
-            try:
-                f._close(term=True)
-            finally:
-                signal.alarm(0)
+            def do_test(func):
+                f.write('''
+                    Auto V p;
+                    L F = g_(0,p1,...,p30);
+                    trace4,0;
+                    .sort
+                ''')
+                f.flush()
+                time.sleep(1)
 
+                signal.signal(signal.SIGALRM, timeout_handler)
+                signal.alarm(5)
+                try:
+                    func()
+                finally:
+                    signal.alarm(0)
+
+            do_test(lambda: f.kill())
             f.open()
-            f.write('''
-                Auto V p;
-                L F = g_(0,p1,...,p30);
-                trace4,0;
-                .sort
-            ''')
-            f.flush()
-            time.sleep(1)
-
-            signal.signal(signal.SIGALRM, timeout_handler)
-            signal.alarm(5)
-            try:
-                f.kill()
-            finally:
-                signal.alarm(0)
+            do_test(lambda: f._close(term=True))
+            f.open()
+            do_test(lambda: f._close(term=True, kill=True))

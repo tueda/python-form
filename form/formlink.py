@@ -228,6 +228,7 @@ class FormLink(object):
     def kill(self):
         """Kill the FORM process and close the connection."""
         self._close(kill=-1)  # Kill it immediately.
+#       self._close(term=-1, kill=1)
 
     def _close(self, term=False, kill=False):
         if not self._closed:
@@ -239,30 +240,45 @@ class FormLink(object):
                 except IOError as e:
                     if e.errno != errno.EPIPE:
                         raise
+
                 if term or kill:
-                    # When a non-zero `term` or `kill` is given, we first wait
-                    # for the child to finish within the duration. If not, stop
-                    # it.
                     import signal
                     import time
-                    t = 0.0
-                    dt = 0.01
-                    timeout = max(term, kill)  # negative value -> no duration
-                    while t < timeout:
-                        pid, err = os.waitpid(self._childpid, os.WNOHANG)
-                        if pid:
-                            break
-                        time.sleep(dt)
-                        t += dt
-                    else:
-                        # Stop the FORM process. Note that we don't use
-                        # setpgrp() and killpg() for the child, but directly
-                        # kill the FORM process.
-                        # In many cases SIGTERM may be enough to stop FORM.
-                        os.kill(self._formpid,
-                                signal.SIGKILL if kill else signal.SIGTERM)
+
+                    # When a non-zero `term` or `kill` is given, we first wait
+                    # for the child to finish within the duration. If not, stop
+                    # it by SIGTERM/SIGKILL. If both `term` and `kill` are
+                    # non-zero, we first try SIGTERM, and then SIGKILL.
+                    # To stop the FORM process, we do not use setpgrp() and
+                    # killpg() for the child, but directly use kill() for the
+                    # FORM process. We expect that then the child process can
+                    # finish shortly.
+
+                    def wait(timeout):  # timeout <= 0 means no wait
                         # Wait for the child to finish.
-                        os.waitpid(self._childpid, 0)
+                        t = 0.0
+                        dt = 0.01
+                        if timeout > 0:
+                            dt = min(timeout, dt)
+                        while True:
+                            pid, err = os.waitpid(self._childpid, os.WNOHANG)
+                            if pid:
+                                return False
+                            if t >= timeout:
+                                return True  # still exists
+                            time.sleep(dt)
+                            t += dt
+
+                    if term and kill:
+                        if wait(term):
+                            os.kill(self._formpid, signal.SIGTERM)
+                            if wait(kill):
+                                os.kill(self._formpid, signal.SIGKILL)
+                                os.waitpid(self._childpid, 0)
+                    else:
+                        if wait(max(term, kill)):  # either term or kill is 0
+                            os.kill(self._formpid,
+                                    signal.SIGKILL if kill else signal.SIGTERM)
                 else:
                     os.waitpid(self._childpid, 0)
                 self._parentin.close()
