@@ -308,3 +308,46 @@ class FormTestCase(unittest.TestCase):
             else:
                 factors = ('2', 'a')
             check_factors('$w', factors)
+
+    def test_kill(self):
+        import errno
+        import os
+        import signal
+        import time
+
+        with form.open() as f:
+            f.write('''
+                Auto V p;
+                L F = g_(0,p1,...,p30);
+                trace4,0;
+                .sort
+            ''')
+            f.flush()
+            time.sleep(1)
+
+            def timeout_handler(signum, frame):
+                raise RuntimeError('Timeout')
+
+            signal.signal(signal.SIGALRM, timeout_handler)
+            signal.alarm(5)
+            try:
+                f._close(term=True)
+            finally:
+                signal.alarm(0)
+
+            f.open()
+            f.write('''
+                Auto V p;
+                L F = g_(0,p1,...,p30);
+                trace4,0;
+                .sort
+            ''')
+            f.flush()
+            time.sleep(1)
+
+            signal.signal(signal.SIGALRM, timeout_handler)
+            signal.alarm(5)
+            try:
+                f.kill()
+            finally:
+                signal.alarm(0)

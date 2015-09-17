@@ -80,6 +80,7 @@ class FormLink(object):
         self._head = None
         self._log = None
         self._childpid = None
+        self._formpid = None
         self._parentin = None
         self._parentout = None
         self._loggingin = None
@@ -149,8 +150,10 @@ class FormLink(object):
                 parentout.close()
                 loggingin.close()
                 raise IOError('failed to read the first line from FORM')
+            s = s.rstrip()
+            formpid = int(s)
             # The parent must send 'pid,ppid\n'.
-            s = s.rstrip() + ',{0}\n'.format(os.getpid())
+            s = s + ',{0}\n'.format(os.getpid())
             parentout.write(s)
             parentout.flush()
             # FORM sends 'OK' (in init.frm).
@@ -185,6 +188,7 @@ class FormLink(object):
                 # Turn off the listing of the input.
                 parentout.write('#-\n')
             self._childpid = pid
+            self._formpid = formpid
             self._parentin = parentin
             self._parentout = parentout
             self._loggingin = loggingin
@@ -219,6 +223,13 @@ class FormLink(object):
         Close the connection to the FORM process established by `open()`. The
         user should call this method after use of each FormLink object.
         """
+        self._close()
+
+    def kill(self):
+        """Kill the FORM process and close the connection."""
+        self._close(kill=-1)  # Kill it immediately.
+
+    def _close(self, term=False, kill=False):
         if not self._closed:
             try:
                 # We ignore broken pipes.
@@ -228,7 +239,32 @@ class FormLink(object):
                 except IOError as e:
                     if e.errno != errno.EPIPE:
                         raise
-                os.waitpid(self._childpid, 0)
+                if term or kill:
+                    # When a non-zero `term` or `kill` is given, we first wait
+                    # for the child to finish within the duration. If not, stop
+                    # it.
+                    import signal
+                    import time
+                    t = 0.0
+                    dt = 0.01
+                    timeout = max(term, kill)  # negative value -> no duration
+                    while t < timeout:
+                        pid, err = os.waitpid(self._childpid, os.WNOHANG)
+                        if pid:
+                            break
+                        time.sleep(dt)
+                        t += dt
+                    else:
+                        # Stop the FORM process. Note that we don't use
+                        # setpgrp() and killpg() for the child, but directly
+                        # kill the FORM process.
+                        # In many cases SIGTERM may be enough to stop FORM.
+                        os.kill(self._formpid,
+                                signal.SIGKILL if kill else signal.SIGTERM)
+                        # Wait for the child to finish.
+                        os.waitpid(self._childpid, 0)
+                else:
+                    os.waitpid(self._childpid, 0)
                 self._parentin.close()
                 try:
                     self._parentout.close()
@@ -241,6 +277,7 @@ class FormLink(object):
                 self._head = None
                 self._log = None
                 self._childpid = None
+                self._formpid = None
                 self._parentin = None
                 self._parentout = None
                 self._loggingin = None
