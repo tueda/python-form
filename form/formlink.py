@@ -279,6 +279,7 @@ class FormLink(object):
                         if wait(max(term, kill)):  # either term or kill is 0
                             os.kill(self._formpid,
                                     signal.SIGKILL if kill else signal.SIGTERM)
+                            os.waitpid(self._childpid, 0)
                 else:
                     os.waitpid(self._childpid, 0)
                 self._parentin.close()
