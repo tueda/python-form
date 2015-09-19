@@ -19,6 +19,12 @@ Installation
 
 ::
 
+    $ pip install python-form
+
+or directly from GitHub:
+
+::
+
     $ pip install git+https://github.com/tueda/python-form.git
 
 Example
