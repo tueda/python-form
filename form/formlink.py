@@ -23,13 +23,16 @@ else:
         """Return True if the given object is a string."""
         return isinstance(obj, str)
 
+
 def set_nonblock(fd):
     """Set the given file descriptor to non-blocking mode."""
     fcntl.fcntl(fd,
                 fcntl.F_SETFL,
                 fcntl.fcntl(fd, fcntl.F_GETFL) | os.O_NONBLOCK)
 
+
 class PushbackReader(object):
+
     """A wrapper class for streams that allows data to be pushed back into the
        stream."""
 
@@ -63,7 +66,9 @@ class PushbackReader(object):
         self._buf = ''
         return s
 
+
 class FormLink(object):
+
     """An object representing a connection to FORM."""
 
     # The input file for FORM.
@@ -261,7 +266,7 @@ class FormLink(object):
                         if timeout > 0:
                             dt = min(timeout, dt)
                         while True:
-                            pid, err = os.waitpid(self._childpid, os.WNOHANG)
+                            pid, _ = os.waitpid(self._childpid, os.WNOHANG)
                             if pid:
                                 return False
                             if t >= timeout:
@@ -411,7 +416,7 @@ class FormLink(object):
                     "#endif\n"
                     "#endif\n"
                     "#toexternal \"{1}\"\n"
-                    ).format(e[1:-2], self._END_MARK))
+                ).format(e[1:-2], self._END_MARK))
             elif len(e) >= 1 and e[0] == '$':
                 self._parentout.write('#toexternal "%${1}",{0}\n'.format(e, self._END_MARK))
             else:
@@ -427,7 +432,7 @@ class FormLink(object):
                 i = out.find(self._END_MARK)
                 if i >= 0:
                     result.append(out[:i])
-                    out = out[i+self._END_MARK_LEN:]
+                    out = out[i + self._END_MARK_LEN:]
                     break
 
                 r, _, _ = select.select((self._parentin, self._loggingin),
@@ -447,7 +452,7 @@ class FormLink(object):
                                         msg += '\n'.join(self._log)
                                     self.close()
                                     raise RuntimeError(msg)
-                        self._loggingin.unread(s[i+1:])
+                        self._loggingin.unread(s[i + 1:])
                 if self._parentin in r:
                     out += (self._parentin.read()
                             .replace('\n', '')

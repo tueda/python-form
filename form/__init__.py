@@ -17,6 +17,7 @@ Example
 
 from .formlink import FormLink
 
+
 def open(args=None, keep_log=False):
     """Open a connection to FORM and return a link object.
 

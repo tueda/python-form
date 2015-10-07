@@ -2,6 +2,7 @@ import os
 import pkgutil
 import sys
 
+
 def get_data_path(package, resource):
     """Return the full file path of a resource of a package."""
     loader = pkgutil.get_loader(package)

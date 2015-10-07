@@ -1,7 +1,9 @@
 import unittest
 import form
 
+
 class FormTestCase(unittest.TestCase):
+
     def test_basic(self):
         with form.open() as f:
             f.write('''
@@ -82,7 +84,7 @@ class FormTestCase(unittest.TestCase):
             f.flush()
             f.flush()
             f.flush()
-            self.assertEqual(f.read('F'), str(N**M))
+            self.assertEqual(f.read('F'), str(N ** M))
 
     def test_errors(self):
         with form.open() as f:
@@ -112,7 +114,7 @@ class FormTestCase(unittest.TestCase):
             f.write('''
                 #$x = 0;
             ''')
-            for i in range(n):
+            for _ in range(n):
                 f.write('''
                     #$x = $x + 1;
                 ''')
@@ -226,7 +228,7 @@ class FormTestCase(unittest.TestCase):
                 .sort
                 #define x "`$x'"
             ''')
-            answer = str(2**1000);
+            answer = str(2 ** 1000)
             self.assertEqual(f.read('F'), answer)
             self.assertEqual(f.read('$x'), answer)
             self.assertEqual(f.read("`x'"), answer)
@@ -310,13 +312,11 @@ class FormTestCase(unittest.TestCase):
             check_factors('$w', factors)
 
     def test_kill(self):
-        import errno
-        import os
         import signal
         import time
 
         with form.open() as f:
-            def timeout_handler(signum, frame):
+            def cb_timeout_handler(signum, frame):
                 raise RuntimeError('Timeout')
 
             def do_test(func):
@@ -329,7 +329,7 @@ class FormTestCase(unittest.TestCase):
                 f.flush()
                 time.sleep(1)
 
-                signal.signal(signal.SIGALRM, timeout_handler)
+                signal.signal(signal.SIGALRM, cb_timeout_handler)
                 signal.alarm(5)
                 try:
                     func()
