@@ -12,10 +12,12 @@ python:
 
 install:
   - pip install .
-  - pip install coveralls
+  - if [ "$TRAVIS_PYTHON_VERSION" == "3.2" ]; then travis_retry pip install coverage==3.7.1; fi
+  - if [ "$TRAVIS_PYTHON_VERSION" != "3.2" ]; then travis_retry pip install coverage; fi
+  - travis_retry pip install coveralls
 
 before_script:
-  - wget https://github.com/vermaseren/form/releases/download/v4.1-20131025/form-4.1-x86_64-linux.tar.gz
+  - travis_retry wget https://github.com/vermaseren/form/releases/download/v4.1-20131025/form-4.1-x86_64-linux.tar.gz
   - tar xvf form-4.1-x86_64-linux.tar.gz
   - export PATH=$PATH:$PWD/form-4.1-x86_64-linux/
 
