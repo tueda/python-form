@@ -21,21 +21,21 @@ from .formlink import FormLink
 def open(args=None, keep_log=False):
     """Open a connection to FORM and return a link object.
 
-    Open a connection to a new FORM process and return a link object. The opened
-    connection should be closed by `close()` method of the returned object. This
-    can be guaranteed by the "with" statement:
+    Open a connection to a new FORM process and return a link object.
+    The opened connection should be closed by `close()` method of the returned
+    object. This can be guaranteed by the "with" statement:
 
     >>> import form
     >>> with form.open() as formlink:
     ...     pass  # use formlink ...
 
-    The optional argument `args` is for the FORM command, a string or a sequence
-    of strings. For example '/path/to/form' or ['tform', '-w4'].
+    The optional argument `args` is for the FORM command, a string or
+    a sequence of strings. For example '/path/to/form' or ['tform', '-w4'].
     The default value is 'form'.
 
     The other argument `keep_log` indicates whether the log from FORM is kept
-    and used as detailed information when an error occurs. If the value is >= 2,
-    it specifies the maximum number of lines for the scrollback.
+    and used as detailed information when an error occurs. If the value
+    is >= 2, it specifies the maximum number of lines for the scrollback.
     The default value is False.
 
     Caveats

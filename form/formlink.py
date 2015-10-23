@@ -1,3 +1,5 @@
+"""Routines for connections to FORM."""
+
 import collections
 import errno
 import fcntl
@@ -33,10 +35,10 @@ def set_nonblock(fd):
 
 class PushbackReader(object):
 
-    """A wrapper class for streams that allows data to be pushed back into the
-       stream."""
+    """Wrapper for streams with push back operations."""
 
     def __init__(self, raw):
+        """Initialize the reader."""
         self._raw = raw
         self._buf = ''
 
@@ -55,13 +57,19 @@ class PushbackReader(object):
         return s
 
     def unread(self, s):
-        """Push back the given string to the internal buffer, which will be used
-           for the next `read()` or `read0()`."""
+        """Push back a string.
+
+        Push back the given string to the internal buffer, which will be used
+        for the next `read()` or `read0()`.
+        """
         self._buf = s + self._buf
 
     def read0(self):
-        """Read the pushed-back data. No call to the underlying raw stream's
-           `read()`."""
+        """Read the pushed-back string.
+
+        Read a string pushed-back by a previous `unread()'. No call to
+        the underlying raw stream's `read()` occurs.
+        """
         s = self._buf
         self._buf = ''
         return s
@@ -92,17 +100,20 @@ class FormLink(object):
         self.open(args, keep_log)
 
     def __enter__(self):
+        """Enter the runtime context."""
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
+        """Exit the runtime context."""
         self.close()
 
     def open(self, args=None, keep_log=False):
         """Open a connection to FORM.
 
-        Open a connection to a new FORM process. The opened connection should be
-        closed by `close()`. Since `open()` is called from the initializer (or
-        `form.open()`), this can be guaranteed by use of the "with" statement:
+        Open a connection to a new FORM process. The opened connection should
+        be closed by `close()`. Since `open()` is called from the initializer
+        (or `form.open()`), this can be guaranteed by use of the "with"
+        statement:
 
         >>> import form
         >>> with form.open() as formlink:
@@ -113,14 +124,15 @@ class FormLink(object):
         The default value is 'form'.
 
         The other argument `keep_log` indicates whether the log from FORM is
-        kept and used as detailed information when an error occurs. If the value
-        is >= 2, it specifies the maximum number of lines for the scrollback.
-        The default value is False.
+        kept and used as detailed information when an error occurs.
+        If the value is >= 2, it specifies the maximum number of lines for
+        the scrollback. The default value is False.
 
         Caveats
         -------
         In the current implementation, keep_log=True may cause a dead lock when
-        the listing of the input is enabled and very long input is sent to FORM.
+        the listing of the input is enabled and very long input is sent to
+        FORM.
         """
         if args is None:
             args = 'form'
@@ -225,8 +237,8 @@ class FormLink(object):
     def close(self):
         """Close the connection to FORM.
 
-        Close the connection to the FORM process established by `open()`. The
-        user should call this method after use of each FormLink object.
+        Close the connection to the FORM process established by `open()`.
+        The user should call this method after use of each FormLink object.
         """
         self._close()
 
@@ -330,9 +342,9 @@ class FormLink(object):
     def read(self, *names):
         """Read results from FORM.
 
-        Wait for a response of FORM to obtain the results specified by the given
-        names and return a corresponding string or (nested) list of strings.
-        Objects to be read from FORM are expressions, $-variables and
+        Wait for a response of FORM to obtain the results specified by
+        the given names and return a corresponding string or (nested) list of
+        strings. Objects to be read from FORM are expressions, $-variables and
         preprocessor variables.
 
         ========== =============================
@@ -392,13 +404,15 @@ class FormLink(object):
 
         for e in names:
             if len(e) >= 2 and e[0] == '`' and e[-1] == "'":
-                self._parentout.write('#toexternal "{0}{1}"\n'.format(e, self._END_MARK))
+                self._parentout.write(
+                    '#toexternal "{0}{1}"\n'.format(e, self._END_MARK))
             elif len(e) >= 3 and e[0] == '$' and e[-2:] == '[]':
                 # Special syntax "$x[]" for factorized $-variables.
-                # NOTE: (1) isfactorized($x) is zero when $x is 0 or $x has only
-                #           one factor even after FactArg is performed.
+                # NOTE: (1) isfactorized($x) is zero when $x is 0 or $x has
+                #           only one factor even after FactArg is performed.
                 #       (2) `$x[0]' is accessible even if FactArg has not been
-                #           performed. Use `$x[0]' rather than isfactorized($x).
+                #           performed. Use `$x[0]' rather than
+                #           `isfactorized($x)`.
                 #       (3) `$x[1]' is not accessible (segfault) with versions
                 #           before Sep  3 2015, if $x has only one factor and
                 #           `$x[0]' gives 1.
@@ -418,9 +432,11 @@ class FormLink(object):
                     "#toexternal \"{1}\"\n"
                 ).format(e[1:-2], self._END_MARK))
             elif len(e) >= 1 and e[0] == '$':
-                self._parentout.write('#toexternal "%${1}",{0}\n'.format(e, self._END_MARK))
+                self._parentout.write(
+                    '#toexternal "%${1}",{0}\n'.format(e, self._END_MARK))
             else:
-                self._parentout.write('#toexternal "%E{1}",{0}\n'.format(e, self._END_MARK))
+                self._parentout.write(
+                    '#toexternal "%E{1}",{0}\n'.format(e, self._END_MARK))
         self._parentout.write('#redefine FORMLINKLOOPVAR "0"')
         self._parentout.write(self._PROMPT)
         self._parentout.flush()
@@ -446,7 +462,8 @@ class FormLink(object):
                             if self._log is not None:
                                 self._log.extend(msgs)
                             for msg in msgs:
-                                if msg.find('-->') >= 0 or msg.find('==>') >= 0:
+                                if (msg.find('-->') >= 0 or
+                                        msg.find('==>') >= 0):
                                     if self._log:
                                         msg += '\n'
                                         msg += '\n'.join(self._log)

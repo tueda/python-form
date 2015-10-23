@@ -1,3 +1,5 @@
+"""Routine to get data file paths."""
+
 import os
 import pkgutil
 import sys
