@@ -1,13 +1,17 @@
 python-form
 ===========
 
-A Python package for communicating with FORM.
+.. image:: https://badge.fury.io/py/python-form.svg
+    :target: https://badge.fury.io/py/python-form
+    :alt: PyPI version
 
 .. image:: https://travis-ci.org/tueda/python-form.svg?branch=master
     :target: https://travis-ci.org/tueda/python-form
+    :alt: Build Status
 
 .. image:: https://coveralls.io/repos/tueda/python-form/badge.svg?branch=master&service=github
-  :target: https://coveralls.io/github/tueda/python-form?branch=master
+    :target: https://coveralls.io/github/tueda/python-form?branch=master
+    :alt: Coverage
 
 This package provides a mechanism to embed FORM_ [1]_ [2]_ [3]_ programs in
 Python code. The basic idea of the implementation is the same as FormLink_ [4]_:
