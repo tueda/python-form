@@ -34,7 +34,6 @@ def set_nonblock(fd):
 
 
 class PushbackReader(object):
-
     """Wrapper for streams with push back operations."""
 
     def __init__(self, raw):
@@ -76,7 +75,6 @@ class PushbackReader(object):
 
 
 class FormLink(object):
-
     """An object representing a connection to FORM."""
 
     # The input file for FORM.
