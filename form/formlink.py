@@ -84,6 +84,20 @@ class FormLink(object):
         self._loggingin = None
         self.open(args, keep_log)
 
+    def __del__(self):
+        """Destructor.
+
+        Free the connection to the FORM process if it still exists. Since in
+        general when the destructor is called in the garbage collection is hard
+        to be determined (and may not be called at all until the program
+        finishes), it is advisable to use the "with" statement.
+        """
+        # Ignore possible errors caused by subtle timing problems.
+        try:
+            self.close()
+        except:
+            pass
+
     def __enter__(self):
         """Enter the runtime context."""
         return self
