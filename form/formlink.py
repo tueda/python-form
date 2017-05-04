@@ -10,20 +10,7 @@ import subprocess
 import sys
 
 from .datapath import get_data_path
-
-_PY3 = sys.version_info[0] >= 3
-_PY32 = sys.version_info >= (3, 2, 0)
-
-if not _PY3:
-    # Python 2
-    def is_string(obj):
-        """Return True if the given object is a string."""
-        return isinstance(obj, basestring)
-else:
-    # Python 3
-    def is_string(obj):
-        """Return True if the given object is a string."""
-        return isinstance(obj, str)
+from .six import PY32, string_types
 
 
 def set_nonblock(fd):
@@ -135,7 +122,7 @@ class FormLink(object):
         if args is None:
             args = 'form'
 
-        if is_string(args):
+        if isinstance(args, string_types):
             args = shlex.split(args)  # Split the arguments.
         elif isinstance(args, (list, tuple)):
             args = list(args)  # As a modifiable mutable object.
@@ -219,7 +206,11 @@ class FormLink(object):
             args.append('{0},{1}'.format(fd_childin, fd_childout))
             args.append(FormLink._INIT_FRM)
 
-            if not _PY32:
+            # In Python 3.2, subprocess.Popen() on UNIX changed the default
+            # value for close_fds from False to True, in order to stop leaking
+            # file descriptors. File descriptors to be kept open should be
+            # specified by pass_fds.
+            if not PY32:
                 subprocess.call(args, shell=False)
             else:
                 subprocess.call(args, shell=False,
@@ -390,14 +381,14 @@ class FormLink(object):
         if self._closed:
             raise IOError('tried to read from closed connection')
 
-        if len(names) == 1 and not is_string(names[0]):
+        if len(names) == 1 and not isinstance(names[0], string_types):
             names = tuple(names[0])
             if len(names) == 1:
                 return [self.read(*names)]  # Guarantee to return a list.
             else:
                 return self.read(*names)
 
-        if any(not is_string(x) for x in names):
+        if any(not isinstance(x, string_types) for x in names):
             return [self.read(x) for x in names]
 
         for e in names:
