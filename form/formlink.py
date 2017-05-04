@@ -106,7 +106,8 @@ class FormLink(object):
 
         The optional argument `args` is for the FORM command, a string or
         a sequence of strings. For example '/path/to/form' or ['tform', '-w4'].
-        The default value is 'form'.
+        By default, the value of the environment variable `$FORM` is used if
+        set, otherwise 'form' will be used.
 
         The other argument `keep_log` indicates whether the log from FORM is
         kept and used as detailed information when an error occurs.
@@ -120,7 +121,10 @@ class FormLink(object):
         FORM.
         """
         if args is None:
-            args = 'form'
+            if 'FORM' in os.environ:
+                args = os.environ['FORM']
+            else:
+                args = 'form'
 
         if isinstance(args, string_types):
             args = shlex.split(args)  # Split the arguments.
