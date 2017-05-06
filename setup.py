@@ -1,8 +1,12 @@
-from setuptools import setup, find_packages
+"""Setup script."""
+from setuptools import find_packages, setup
+
 
 def readme():
+    """Read the README file."""
     with open('README.rst') as f:
         return f.read()
+
 
 setup(
     name='python-form',
@@ -36,6 +40,5 @@ setup(
     package_data={
         'form': ['init.frm'],
     },
-    test_suite='nose.collector',
-    tests_require=['nose'],
+    setup_requires=['nose'],
 )

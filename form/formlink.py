@@ -504,13 +504,13 @@ class FormLink(object):
 
     @property
     def _dateversion(self):
+        """Return the build/revision date as an integer "yyyymmdd"."""
         import re
         if self._head:
             m = re.search(r'(?<=\()(.*)(?=\))', self._head)
             if m:
-                dv = m.group(0)
-                s = dv.split()
-                if len(s) == 3:
+                s = re.split(r'[, ]+', m.group(0))
+                if len(s) >= 3:
                     # month
                     month_names = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec')

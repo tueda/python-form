@@ -11,16 +11,30 @@ python:
   - pypy
   - pypy3
 
+env:
+  - FORM_VERSION=4.1
+
 install:
+  # Install FORM.
+  - |
+    case "$FORM_VERSION" in
+      4.0-20120410)
+      form_url=https://github.com/vermaseren/form/releases/download/v4.0-20120410/form-4.0-20120410-x86_64-linux.tar.gz
+        ;;
+      4.1)
+        form_url=https://github.com/vermaseren/form/releases/download/v4.1-20131025/form-4.1-x86_64-linux.tar.gz
+        ;;
+    esac
+  - travis_retry wget $form_url
+  - tar xvf $(basename $form_url)
+  - export PATH=$PATH:$(pwd)/$(basename $form_url .tar.gz)
+  - form -v | grep -v sec
+  # Get installed.
   - pip install .
+  # For Coveralls.
   - if [ "$TRAVIS_PYTHON_VERSION" == "3.2" ]; then travis_retry pip install coverage==3.7.1; fi
   - if [ "$TRAVIS_PYTHON_VERSION" != "3.2" ]; then travis_retry pip install coverage; fi
   - travis_retry pip install coveralls
-
-before_script:
-  - travis_retry wget https://github.com/vermaseren/form/releases/download/v4.1-20131025/form-4.1-x86_64-linux.tar.gz
-  - tar xvf form-4.1-x86_64-linux.tar.gz
-  - export PATH=$PATH:$PWD/form-4.1-x86_64-linux/
 
 script:
   - nosetests --with-doctest --with-coverage --cover-package=form

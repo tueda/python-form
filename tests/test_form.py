@@ -1,10 +1,16 @@
+"""Test cases for form."""
+
 import unittest
+
 import form
 
 
 class FormTestCase(unittest.TestCase):
+    """Test cases."""
 
     def test_basic(self):
+        """Basic tests for FormLink."""
+        import re
         with form.open() as f:
             f.write('''
                 AutoDeclare Vector p;
@@ -12,24 +18,25 @@ class FormTestCase(unittest.TestCase):
                 trace4,0;
                 .sort
             ''')
-            str_F = f.read('F')
+            str_f = f.read('F')
             f.write('''
                 #$n = termsin_(F);
             ''')
             str_n = f.read('$n')
             str_z = f.read("`ZERO_F'")
 
-        self.assertEqual(str_F, '\
-4*p1.p2*p3.p4*p5.p6-4*p1.p2*p3.p5*p4.p6+4*p1.p2*p3.p6*p4.p5\
--4*p1.p3*p2.p4*p5.p6+4*p1.p3*p2.p5*p4.p6-4*p1.p3*p2.p6*p4.p5\
-+4*p1.p4*p2.p3*p5.p6-4*p1.p4*p2.p5*p3.p6+4*p1.p4*p2.p6*p3.p5\
--4*p1.p5*p2.p3*p4.p6+4*p1.p5*p2.p4*p3.p6-4*p1.p5*p2.p6*p3.p4\
-+4*p1.p6*p2.p3*p4.p5-4*p1.p6*p2.p4*p3.p5+4*p1.p6*p2.p5*p3.p4\
-')
+        self.assertEqual(str_f, re.sub(r'\s+', '', '''
+            4*p1.p2*p3.p4*p5.p6-4*p1.p2*p3.p5*p4.p6+4*p1.p2*p3.p6*p4.p5
+            -4*p1.p3*p2.p4*p5.p6+4*p1.p3*p2.p5*p4.p6-4*p1.p3*p2.p6*p4.p5
+            +4*p1.p4*p2.p3*p5.p6-4*p1.p4*p2.p5*p3.p6+4*p1.p4*p2.p6*p3.p5
+            -4*p1.p5*p2.p3*p4.p6+4*p1.p5*p2.p4*p3.p6-4*p1.p5*p2.p6*p3.p4
+            +4*p1.p6*p2.p3*p4.p5-4*p1.p6*p2.p4*p3.p5+4*p1.p6*p2.p5*p3.p4
+        '''))
         self.assertEqual(str_n, '15')
         self.assertEqual(str_z, '0')
 
     def test_multiple_read(self):
+        """Test multiple arguments for FormLink.read()."""
         with form.open() as f:
             f.write('''
                 S x;
@@ -42,6 +49,7 @@ class FormTestCase(unittest.TestCase):
                              ['1+2*x+x^2', '1-2*x+x^2'])
 
     def test_old_style(self):
+        """Tests without the "with" statement."""
         f = form.open()
         try:
             f.write('''
@@ -56,6 +64,7 @@ class FormTestCase(unittest.TestCase):
         self.assertEqual(f.closed, True)
 
     def test_arguments(self):
+        """Test complicated arguments for FormLink.open()."""
         with form.open('form -D N1=123 -D N2=456') as f:
             self.assertEqual(f.read("`N1'"), '123')
             self.assertEqual(f.read("`N2'"), '456')
@@ -65,9 +74,10 @@ class FormTestCase(unittest.TestCase):
             self.assertEqual(f.read("`N2'"), '456')
 
     def test_flush(self):
+        """Tests for FormLink.flush()."""
         with form.open() as f:
-            N = 9
-            M = 10
+            n = 9
+            m = 10
             f.write('''
                 #define N "{0}"
                 #define M "{1}"
@@ -78,15 +88,17 @@ class FormTestCase(unittest.TestCase):
                   id x`i' = 1;
                 #enddo
                 .sort
-            '''.format(N, M))
+            '''.format(n, m))
             # The following calls of flush() must be irrelevant.
             f.flush()
             f.flush()
             f.flush()
             f.flush()
-            self.assertEqual(f.read('F'), str(N ** M))
+            self.assertEqual(f.read('F'), str(n ** m))
 
     def test_errors(self):
+        """Tests for erroneous cases."""
+        # Undeclared symbols.
         with form.open() as f:
             f.write('''
                 L F = (1+x)^2;
@@ -94,6 +106,7 @@ class FormTestCase(unittest.TestCase):
             ''')
             self.assertRaises(RuntimeError, f.read, 'F')
 
+        # Undefined expressions.
         with form.open() as f:
             f.write('''
                 S x;
@@ -102,6 +115,7 @@ class FormTestCase(unittest.TestCase):
             ''')
             self.assertRaises(RuntimeError, f.read, 'G')
 
+        # Accesses to closed connections.
         with form.open() as f:
             f.close()
             self.assertRaises(IOError, f.write, '')
@@ -109,6 +123,7 @@ class FormTestCase(unittest.TestCase):
             self.assertRaises(IOError, f.read)
 
     def test_many_times(self):
+        """Test with many reads/writes."""
         with form.open() as f:
             n = 2000
             f.write('''
@@ -122,6 +137,7 @@ class FormTestCase(unittest.TestCase):
             self.assertEqual(int(f.read('$x')), n)
 
     def test_keep_log(self):
+        """Tests with keep_log."""
         script = '''
             On stats;
             S x;
@@ -187,6 +203,7 @@ class FormTestCase(unittest.TestCase):
             self.assertTrue(msg.find('L G = (1-x)^2;') >= 0)
 
     def test_seq_args(self):
+        """Test complicated arguments for FormLink.read()."""
         with form.open() as f:
             f.write('''
                 #do i=1,9
@@ -221,6 +238,7 @@ class FormTestCase(unittest.TestCase):
                              ['1', ['2', '3', '4']])
 
     def test_long_lines(self):
+        """Test with long lines."""
         with form.open() as f:
             f.write('''
                 L F = 2^1000;
@@ -234,6 +252,7 @@ class FormTestCase(unittest.TestCase):
             self.assertEqual(f.read("`x'"), answer)
 
     def test_empty_lines(self):
+        """Test input with empty lines."""
         with form.open() as f:
             f.write('''
                 On stats;
@@ -248,6 +267,7 @@ class FormTestCase(unittest.TestCase):
             self.assertEqual(f.read('F'), '1+2*x+x^2')
 
     def test_factdollar(self):
+        """Tests with factorized $-variables."""
         def join(factors):
             return '({0})'.format(')*('.join(factors))
 
@@ -312,9 +332,9 @@ class FormTestCase(unittest.TestCase):
             check_factors('$w', factors)
 
     def test_kill(self):
+        """Tests for FormLink.kill()."""
         import signal
         import time
-
         with form.open() as f:
             def cb_timeout_handler(signum, frame):
                 raise RuntimeError('Timeout')
@@ -327,10 +347,10 @@ class FormTestCase(unittest.TestCase):
                     .sort
                 ''')
                 f.flush()
-                time.sleep(1)
+                time.sleep(0.5)
 
                 signal.signal(signal.SIGALRM, cb_timeout_handler)
-                signal.alarm(5)
+                signal.alarm(2)
                 try:
                     func()
                 finally:
