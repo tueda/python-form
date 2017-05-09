@@ -279,13 +279,14 @@ class FormTestCase(unittest.TestCase):
             self.assertEqual(f.read('{0}[]'.format(x)), join(factors))
 
         with form.open() as f:
-            # NOTE: The order of factors has been changed since Sep  3 2015.
+            # NOTE: The order of factors was changed by the version
+            #       v4.1-20131025-112-g8805b9e [2015-08-31].
             f.write('''
                 S a,b;
                 #$x = (-5)*(a^5-b^5);
                 #factdollar $x
             ''')
-            if f._dateversion >= 20150903:
+            if f._dateversion >= 20150831:
                 factors = ('b-a', 'b^4+a*b^3+a^2*b^2+a^3*b+a^4', '5')
             else:
                 factors = ('5', 'b-a', 'b^4+a*b^3+a^2*b^2+a^3*b+a^4')
@@ -361,3 +362,17 @@ class FormTestCase(unittest.TestCase):
             do_test(lambda: f._close(term=True))
             f.open()
             do_test(lambda: f._close(term=True, kill=True))
+
+    def test_head(self):
+        """Test for FormLink.head."""
+        with form.open() as f:
+            head = f.head
+            self.assertTrue(
+                head[:4] == 'FORM' or
+                head[:5] == 'TFORM' or
+                head[:7] == 'ParFORM'
+            )
+
+
+if __name__ == '__main__':
+    unittest.main()
