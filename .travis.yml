@@ -13,6 +13,7 @@ python:
 
 env:
   - FORM_VERSION=4.1
+  - FORM_VERSION=4.1-snapshot-20170428
 
 install:
   # Install FORM.
@@ -23,6 +24,9 @@ install:
         ;;
       4.1)
         form_url=https://github.com/vermaseren/form/releases/download/v4.1-20131025/form-4.1-x86_64-linux.tar.gz
+        ;;
+      4.1-snapshot-20170428)
+        form_url=https://github.com/tueda/form/releases/download/v4.1-20131025-snapshot-20170428/form-4.1-20131025-snapshot-20170428-x86_64-linux.tar.gz
         ;;
     esac
   - travis_retry wget $form_url
