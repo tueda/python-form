@@ -1,5 +1,7 @@
 Off stats;
 Off finalstats;
+Format nospaces;
+Format 255;
 #ifndef `PIPES_'
   #message "No pipes found"
   .end;

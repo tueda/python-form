@@ -450,13 +450,16 @@ class FormLink(object):
 
         result = []
         out = self._parentin.read0()
+        out_start = 0  # start position for searching _END_MARK.
         for e in names:
             while True:
-                i = out.find(self._END_MARK)
+                i = out.find(self._END_MARK, out_start)
                 if i >= 0:
                     result.append(out[:i])
                     out = out[i + self._END_MARK_LEN:]
+                    out_start = 0
                     break
+                out_start = max(len(out) - self._END_MARK_LEN, 0)
 
                 r, _, _ = select.select((self._parentin, self._loggingin),
                                         (), ())
