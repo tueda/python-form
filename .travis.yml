@@ -46,7 +46,7 @@ install:
   - travis_retry pip install coveralls
 
 script:
-  - nosetests --with-doctest --with-coverage --cover-package=form
+  - nosetests --with-coverage
 
 after_success:
   - coveralls
