@@ -8,12 +8,17 @@ python:
   - 3.4
   - 3.5
   - 3.6
+  - nightly
   - pypy
   - pypy3
 
 env:
   - FORM_VERSION=4.1
   - FORM_VERSION=4.1-snapshot-20170428
+
+matrix:
+  allow_failures:
+    - python: nightly
 
 install:
   # Install FORM.
