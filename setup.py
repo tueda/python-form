@@ -11,7 +11,7 @@ def readme():
 
 setup(
     name='python-form',
-    version='0.1.0',
+    version='0.2.0',
     description='A package for communicating with FORM',
     long_description=readme(),
     author='Takahiro Ueda',
