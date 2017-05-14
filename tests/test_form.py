@@ -373,6 +373,21 @@ class FormTestCase(unittest.TestCase):
                 head[:7] == 'ParFORM'
             )
 
+    def test_environ(self):
+        """Test for $FORM."""
+        import os
+        old_form = os.environ.get('FORM', None)
+        try:
+            os.environ['FORM'] = 'form -D X=12345'
+
+            with form.open() as f:
+                self.assertEqual(f.read("`X'"), '12345')
+        finally:
+            if old_form is None:
+                del os.environ['FORM']
+            else:
+                os.environ['FORM'] = old_form
+
 
 if __name__ == '__main__':
     unittest.main()
