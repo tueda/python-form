@@ -41,8 +41,15 @@ install:
   # Get installed.
   - pip install .
   # For Coveralls.
-  - if [ "$TRAVIS_PYTHON_VERSION" == "3.2" ]; then travis_retry pip install coverage==3.7.1; fi
-  - if [ "$TRAVIS_PYTHON_VERSION" != "3.2" ]; then travis_retry pip install coverage; fi
+  - |
+    case "$TRAVIS_PYTHON_VERSION" in
+      3.2)
+        travis_retry pip install coverage==3.7.1
+        ;;
+      *)
+        travis_retry pip install coverage
+        ;;
+    esac
   - travis_retry pip install coveralls
 
 script:
