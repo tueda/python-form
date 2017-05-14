@@ -1,4 +1,5 @@
 """Setup script."""
+
 from setuptools import find_packages, setup
 
 
@@ -35,10 +36,8 @@ setup(
         'Topic :: Scientific/Engineering :: Mathematics',
         'Topic :: Scientific/Engineering :: Physics',
     ],
-    keywords='form, computer algebra',
+    keywords='binding, form, computer algebra',
     packages=find_packages(),
-    package_data={
-        'form': ['init.frm'],
-    },
+    package_data={'form': ['init.frm']},
     setup_requires=['nose'],
 )

@@ -2,8 +2,12 @@ python-form
 ===========
 
 .. image:: https://badge.fury.io/py/python-form.svg
-    :target: https://badge.fury.io/py/python-form
+    :target: https://pypi.python.org/pypi/python-form
     :alt: PyPI version
+
+.. image:: https://img.shields.io/pypi/pyversions/python-form.svg
+    :target: https://pypi.python.org/pypi/python-form
+    :alt: Python versions
 
 .. image:: https://travis-ci.org/tueda/python-form.svg?branch=master
     :target: https://travis-ci.org/tueda/python-form
@@ -15,8 +19,8 @@ python-form
 
 This package provides a mechanism to embed FORM_ [1]_ [2]_ [3]_ programs in
 Python code. The basic idea of the implementation is the same as FormLink_ [4]_:
-it utilizes unnamed pipes between FORM and an external program [5]_. It is
-expected to work on Unix-like systems.
+it utilizes unnamed pipes between FORM and an external program [5]_, Python in
+this case. It is expected to work on Unix-like systems.
 
 Installation
 ------------
@@ -30,6 +34,8 @@ or directly from GitHub:
 ::
 
     $ pip install git+https://github.com/tueda/python-form.git
+
+See also the documentation for `pip install`_.
 
 Example
 -------
@@ -52,6 +58,7 @@ References
 
 .. _FORM: http://www.nikhef.nl/~form/
 .. _FormLink: http://www.feyncalc.org/formlink/
+.. _pip install: https://pip.pypa.io/en/stable/reference/pip_install/
 .. [1] J.A.M. Vermaseren,
        New features of FORM,
        `arXiv:math-ph/0010025
