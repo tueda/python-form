@@ -2,7 +2,6 @@
 
 import collections
 import errno
-import fcntl
 import os
 import select
 import shlex
@@ -10,55 +9,8 @@ import subprocess
 import sys
 
 from .datapath import get_data_path
+from .io import PushbackReader, set_nonblock
 from .six import PY32, string_types
-
-
-def set_nonblock(fd):
-    """Set the given file descriptor to non-blocking mode."""
-    fcntl.fcntl(fd,
-                fcntl.F_SETFL,
-                fcntl.fcntl(fd, fcntl.F_GETFL) | os.O_NONBLOCK)
-
-
-class PushbackReader(object):
-    """Wrapper for streams with push back operations."""
-
-    def __init__(self, raw):
-        """Initialize the reader."""
-        self._raw = raw
-        self._buf = ''
-
-    def close(self):
-        """Close the stream."""
-        self._raw.close()
-
-    def fileno(self):
-        """Return the file descriptor."""
-        return self._raw.fileno()
-
-    def read(self):
-        """Read data from the stream."""
-        s = self._buf + self._raw.read()
-        self._buf = ''
-        return s
-
-    def unread(self, s):
-        """Push back a string.
-
-        Push back the given string to the internal buffer, which will be used
-        for the next `read()` or `read0()`.
-        """
-        self._buf = s + self._buf
-
-    def read0(self):
-        """Read the pushed-back string.
-
-        Read a string pushed-back by a previous `unread()'. No call to
-        the underlying raw stream's `read()` occurs.
-        """
-        s = self._buf
-        self._buf = ''
-        return s
 
 
 class FormLink(object):
@@ -214,6 +166,11 @@ class FormLink(object):
             self._loggingin = loggingin
         else:
             # child process
+
+            # NOTE: Coverage fails to collect data from child processes when
+            #       the os.fork+os._exit pattern is used.
+            #       https://bitbucket.org/ned/coveragepy/issues/310
+
             os.close(fd_parentout)
             os.close(fd_parentin)
             os.close(fd_loggingin)
@@ -248,11 +205,6 @@ class FormLink(object):
         The user should call this method after use of each FormLink object.
         """
         self._close()
-
-    def kill(self):
-        """Kill the FORM process and close the connection."""
-        self._close(kill=-1)  # Kill it immediately.
-#       self._close(term=-1, kill=1)
 
     def _close(self, term=False, kill=False):
         if not self._closed:
@@ -322,6 +274,11 @@ class FormLink(object):
                 self._parentin = None
                 self._parentout = None
                 self._loggingin = None
+
+    def kill(self):
+        """Kill the FORM process and close the connection."""
+        self._close(kill=-1)  # Kill it immediately.
+#       self._close(term=-1, kill=1)
 
     def write(self, script):
         """Send a script to FORM.
