@@ -17,6 +17,10 @@ python-form
     :target: https://coveralls.io/github/tueda/python-form?branch=master
     :alt: Coverage
 
+.. image:: https://readthedocs.org/projects/python-form/badge/?version=latest
+    :target: https://python-form.readthedocs.io/en/latest
+    :alt: Documentation Status
+
 This package provides a mechanism to embed FORM_ [1]_ [2]_ [3]_ programs in
 Python code. The basic idea of the implementation is the same as FormLink_ [4]_:
 it utilizes unnamed pipes between FORM and an external program [5]_, Python in

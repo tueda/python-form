@@ -1,9 +1,8 @@
-"""A Python package for communicating with FORM.
+"""Provide routines for communicating with FORM.
 
 Example
 -------
 >>> import form
-
 >>> with form.open() as f:
 ...     f.write('''
 ...         AutoDeclare Vector p;
@@ -21,9 +20,11 @@ from .formlink import FormLink
 def open(args=None, keep_log=False):
     """Open a connection to FORM and return a link object.
 
-    Open a connection to a new FORM process and return a link object.
-    The opened connection should be closed by `close()` method of the returned
-    object. This can be guaranteed by the "with" statement:
+    Open a connection to a new FORM process and return a
+    :class:`link object <form.FormLink>`.
+    The opened connection should be closed by
+    :meth:`close() <form.FormLink.close>` of the returned object, which is
+    automatically done by use of the "with" statement:
 
     >>> import form
     >>> with form.open() as formlink:
@@ -39,8 +40,8 @@ def open(args=None, keep_log=False):
     is >= 2, it specifies the maximum number of lines for the scrollback.
     The default value is False.
 
-    Caveats
-    -------
+    Note
+    ----
     In the current implementation, keep_log=True may cause a dead lock when the
     listing of the input is enabled and very long input is sent to FORM.
     """

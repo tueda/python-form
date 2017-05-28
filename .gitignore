@@ -7,4 +7,6 @@ dist/
 *.egg/
 *.eggs/
 
+doc/_build/
+
 .coverage*

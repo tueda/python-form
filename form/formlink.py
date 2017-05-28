@@ -14,7 +14,7 @@ from .six import PY32, string_types
 
 
 class FormLink(object):
-    """An object representing a connection to FORM."""
+    """Connection to a FORM process."""
 
     # The input file for FORM.
     _INIT_FRM = get_data_path('form', 'init.frm')
@@ -25,7 +25,7 @@ class FormLink(object):
     _PROMPT = '\n__READY__\n'
 
     def __init__(self, args=None, keep_log=False):
-        """Initialize a connection to a FORM process."""
+        """Open a connection to a FORM process."""
         self._closed = True
         self._head = None
         self._log = None
@@ -62,13 +62,16 @@ class FormLink(object):
         """Open a connection to FORM.
 
         Open a connection to a new FORM process. The opened connection should
-        be closed by `close()`. Since `open()` is called from the initializer
-        (or `form.open()`), this can be guaranteed by use of the "with"
-        statement:
+        be closed by :meth:`close`, which can be guaranteed by use of the
+        "with" statement:
 
         >>> import form
         >>> with form.open() as formlink:
         ...     pass  # use formlink ...
+
+        If this method is called for a link object that has an established
+        connection to a FORM process, then the existing connection will be
+        closed and a new connection will be created.
 
         The optional argument `args` is for the FORM command, a string or
         a sequence of strings. For example '/path/to/form' or ['tform', '-w4'].
@@ -80,8 +83,8 @@ class FormLink(object):
         If the value is >= 2, it specifies the maximum number of lines for
         the scrollback. The default value is False.
 
-        Caveats
-        -------
+        Note
+        ----
         In the current implementation, keep_log=True may cause a dead lock when
         the listing of the input is enabled and very long input is sent to
         FORM.
@@ -201,8 +204,10 @@ class FormLink(object):
     def close(self):
         """Close the connection to FORM.
 
-        Close the connection to the FORM process established by `open()`.
-        The user should call this method after use of each FormLink object.
+        Close the connection to the FORM process established by :meth:`open`.
+        Do nothing if the connection is already closed. The user should call
+        this method after use of a link object, which is usually guaranteed by
+        use of the "with" statement.
         """
         self._close()
 
@@ -284,8 +289,8 @@ class FormLink(object):
         """Send a script to FORM.
 
         Write the given script to the communication channel to FORM. It could
-        be buffered and so FORM may not execute the sent script until `flush()`
-        or `read()` is called.
+        be buffered and so FORM may not execute the sent script until
+        :meth:`flush` or :meth:`read` is called.
         """
         if self._closed:
             raise IOError('tried to write to closed connection')
@@ -297,14 +302,16 @@ class FormLink(object):
     def flush(self):
         """Flush the channel to FORM.
 
-        Flush the communication channel to FORM.
+        Flush the communication channel to FORM. Because :meth:`write` is
+        buffered and :meth:`read` is a blocking operation, this method is used
+        for asynchronous execution of FORM scripts.
         """
         if self._closed:
             raise IOError('tried to flush closed connection')
         self._parentout.flush()
 
     def read(self, *names):
-        """Read results from FORM.
+        r"""Read results from FORM.
 
         Wait for a response of FORM to obtain the results specified by
         the given names and return a corresponding string or (nested) list of
@@ -317,7 +324,7 @@ class FormLink(object):
           "F"        expression F
           "$x"       $-variable $x
           "$x[]"     factorized $-variable $x
-          "`A'"      preprocessor variable A
+          "\`A'"     preprocessor variable A
         ========== =============================
 
         Note that the communication for the reading is performed within the
@@ -325,7 +332,7 @@ class FormLink(object):
         ".sort" to get the correct result.
 
         If non-string objects are passed, they are considered as sequences, and
-        the return value becomes the list corresponding to the arguments. If
+        the return value becomes a list corresponding to the arguments. If
         a sequence is passed as the argument to this method, it is guaranteed
         that the return value is always a list:
 

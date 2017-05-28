@@ -2,18 +2,10 @@
 
 from setuptools import find_packages, setup
 
-
-def readme():
-    """Read the README file."""
-    with open('README.rst') as f:
-        return f.read()
-
-
-setup(
+_metadata = dict(
     name='python-form',
     version='0.2.0',
     description='A package for communicating with FORM',
-    long_description=readme(),
     author='Takahiro Ueda',
     author_email='tueda@nikhef.nl',
     url='https://github.com/tueda/python-form',
@@ -37,7 +29,24 @@ setup(
         'Topic :: Scientific/Engineering :: Physics',
     ],
     keywords='binding, form, computer algebra',
-    packages=find_packages(),
     package_data={'form': ['init.frm']},
     setup_requires=['nose'],
 )
+
+
+def readme():
+    """Read the README file."""
+    with open('README.rst') as f:
+        return f.read()
+
+
+def setup_package():
+    """Entry point."""
+    md = dict(_metadata)
+    md['long_description'] = readme()
+    md['packages'] = find_packages()
+    setup(**md)
+
+
+if __name__ == '__main__':
+    setup_package()
