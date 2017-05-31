@@ -57,6 +57,16 @@ Example
         ''')
         print(f.read('F'))
 
+Licence
+-------
+
+python-form is distributed under the MIT licence.
+See the `LICENCE <LICENCE.md>`_ file.
+
+Note that FORM itself adopts the GPL version 3. A program/package using FORM via
+python-form could be considered as an aggregate (at your own risk) or a combined
+work affected by the GPL.
+
 References
 ----------
 
