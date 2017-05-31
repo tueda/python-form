@@ -30,19 +30,19 @@ def open(args=None, keep_log=False):
     >>> with form.open() as formlink:
     ...     pass  # use formlink ...
 
-    The optional argument `args` is for the FORM command, a string or
+    The optional argument ``args`` is for the FORM command, a string or
     a sequence of strings. For example '/path/to/form' or ['tform', '-w4'].
-    By default, the value of the environment variable `$FORM` is used if set,
+    By default, the value of the environment variable ``$FORM`` is used if set,
     otherwise 'form' will be used.
 
-    The other argument `keep_log` indicates whether the log from FORM is kept
+    The other argument ``keep_log`` indicates whether the log from FORM is kept
     and used as detailed information when an error occurs. If the value
     is >= 2, it specifies the maximum number of lines for the scrollback.
     The default value is False.
 
     Note
     ----
-    In the current implementation, keep_log=True may cause a dead lock when the
-    listing of the input is enabled and very long input is sent to FORM.
+    In the current implementation, ``keep_log=True`` may cause a dead lock when
+    the listing of the input is enabled and very long input is sent to FORM.
     """
     return FormLink(args, keep_log)

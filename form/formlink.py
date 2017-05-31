@@ -73,20 +73,20 @@ class FormLink(object):
         connection to a FORM process, then the existing connection will be
         closed and a new connection will be created.
 
-        The optional argument `args` is for the FORM command, a string or
+        The optional argument ``args`` is for the FORM command, a string or
         a sequence of strings. For example '/path/to/form' or ['tform', '-w4'].
-        By default, the value of the environment variable `$FORM` is used if
+        By default, the value of the environment variable ``$FORM`` is used if
         set, otherwise 'form' will be used.
 
-        The other argument `keep_log` indicates whether the log from FORM is
+        The other argument ``keep_log`` indicates whether the log from FORM is
         kept and used as detailed information when an error occurs.
         If the value is >= 2, it specifies the maximum number of lines for
         the scrollback. The default value is False.
 
         Note
         ----
-        In the current implementation, keep_log=True may cause a dead lock when
-        the listing of the input is enabled and very long input is sent to
+        In the current implementation, ``keep_log=True`` may cause a dead lock
+        when the listing of the input is enabled and very long input is sent to
         FORM.
         """
         if args is None:
@@ -226,10 +226,10 @@ class FormLink(object):
                     import signal
                     import time
 
-                    # When a non-zero `term` or `kill` is given, we first wait
-                    # for the child to finish within the duration. If not, stop
-                    # it by SIGTERM/SIGKILL. If both `term` and `kill` are
-                    # non-zero, we first try SIGTERM, and then SIGKILL.
+                    # When a non-zero ``term`` or ``kill`` is given, we first
+                    # wait for the child to finish within the duration. If not,
+                    # stop it by SIGTERM/SIGKILL. If both ``term`` and ``kill``
+                    # are non-zero, we first try SIGTERM, and then SIGKILL.
                     # To stop the FORM process, we do not use setpgrp() and
                     # killpg() for the child, but directly use kill() for the
                     # FORM process. We expect that then the child process can

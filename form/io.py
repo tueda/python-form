@@ -37,15 +37,15 @@ class PushbackReader(object):
         """Push back a string.
 
         Push back the given string to the internal buffer, which will be used
-        for the next `read()` or `read0()`.
+        for the next ``read()`` or ``read0()``.
         """
         self._buf = s + self._buf
 
     def read0(self):
         """Read the pushed-back string.
 
-        Read a string pushed-back by a previous `unread()'. No call to
-        the underlying raw stream's `read()` occurs.
+        Read a string pushed-back by a previous ``unread()``. No call to
+        the underlying raw stream's ``read()`` occurs.
         """
         s = self._buf
         self._buf = ''
