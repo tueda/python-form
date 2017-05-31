@@ -4,7 +4,7 @@ from setuptools import find_packages, setup
 
 _metadata = dict(
     name='python-form',
-    version='0.2.0',
+    version='0.2.1',
     description='A package for communicating with FORM',
     author='Takahiro Ueda',
     author_email='tueda@nikhef.nl',

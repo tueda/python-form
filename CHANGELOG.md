@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.2.1](https://github.com/tueda/python-form/releases/tag/v0.2.1) (2017-05-31)
+
+- This version came with document enhancement.
+
+[Full changes...](https://github.com/tueda/python-form/compare/v0.2.0...v0.2.1)
+
 ## [0.2.0](https://github.com/tueda/python-form/releases/tag/v0.2.0) (2017-05-14)
 
 ### Changed
