@@ -60,27 +60,28 @@ Example
 References
 ----------
 
-.. _FORM: http://www.nikhef.nl/~form/
-.. _FormLink: http://www.feyncalc.org/formlink/
+.. _FORM: https://www.nikhef.nl/~form/
+.. _FormLink: https://www.feyncalc.org/formlink/
 .. _pip install: https://pip.pypa.io/en/stable/reference/pip_install/
+
 .. [1] J.A.M. Vermaseren,
        New features of FORM,
        `arXiv:math-ph/0010025
-       <http://arxiv.org/abs/math-ph/0010025>`_.
+       <https://arxiv.org/abs/math-ph/0010025>`_.
 .. [2] J. Kuipers, T. Ueda, J.A.M. Vermaseren and J. Vollinga,
        FORM version 4.0,
        `Comput.Phys.Commun. 184 (2013) 1453-1467
-       <http://dx.doi.org/10.1016/j.cpc.2012.12.028>`_,
+       <https://dx.doi.org/10.1016/j.cpc.2012.12.028>`_,
        `arXiv:1203.6543 [cs.SC]
-       <http://arxiv.org/abs/1203.6543>`_.
+       <https://arxiv.org/abs/1203.6543>`_.
 .. [3] https://github.com/vermaseren/form
 .. [4] Feng Feng and Rolf Mertig,
        FormLink/FeynCalcFormLink : Embedding FORM in Mathematica and FeynCalc,
        `arXiv:1212.3522 [hep-ph]
-       <http://arxiv.org/abs/1212.3522>`_.
+       <https://arxiv.org/abs/1212.3522>`_.
 .. [5] M. Tentyukov and J.A.M. Vermaseren,
        Extension of the functionality of the symbolic program FORM by external software,
        `Comput.Phys.Commun. 176 (2007) 385-405
-       <http://dx.doi.org/10.1016/j.cpc.2006.11.007>`_,
+       <https://dx.doi.org/10.1016/j.cpc.2006.11.007>`_,
        `arXiv:cs/0604052
-       <http://arxiv.org/abs/cs/0604052>`_.
+       <https://arxiv.org/abs/cs/0604052>`_.
