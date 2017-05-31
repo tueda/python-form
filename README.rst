@@ -33,7 +33,7 @@ Installation
 
     $ pip install python-form
 
-or directly from GitHub:
+or directly from GitHub for the latest development version:
 
 ::
 
@@ -56,6 +56,12 @@ Example
             .sort
         ''')
         print(f.read('F'))
+
+Documentation
+-------------
+
+- `Package Documentation <https://python-form.readthedocs.io/en/stable>`_
+- `CHANGELOG <CHANGELOG.md>`_
 
 Licence
 -------
