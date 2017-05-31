@@ -60,14 +60,14 @@ Example
 Documentation
 -------------
 
-- `Package Documentation <https://python-form.readthedocs.io/en/stable>`_
-- `CHANGELOG <CHANGELOG.md>`_
+- `Package Documentation`_
+- CHANGELOG_
 
 Licence
 -------
 
 python-form is distributed under the MIT licence.
-See the `LICENCE <LICENCE.md>`_ file.
+See the LICENCE_ file.
 
 Note that FORM itself adopts the GPL version 3. A program/package using FORM via
 python-form could be considered as an aggregate (at your own risk) or a combined
@@ -79,6 +79,9 @@ References
 .. _FORM: https://www.nikhef.nl/~form/
 .. _FormLink: https://www.feyncalc.org/formlink/
 .. _pip install: https://pip.pypa.io/en/stable/reference/pip_install/
+.. _Package Documentation: https://python-form.readthedocs.io/en/stable/
+.. _CHANGELOG: https://github.com/tueda/python-form/blob/master/CHANGELOG.md
+.. _LICENCE: https://github.com/tueda/python-form/blob/master/LICENCE.md
 
 .. [1] J.A.M. Vermaseren,
        New features of FORM,
