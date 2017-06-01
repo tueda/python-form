@@ -3,6 +3,7 @@
 import unittest
 
 import form
+from form import FormError
 
 
 class FormTestCase(unittest.TestCase):
@@ -104,7 +105,7 @@ class FormTestCase(unittest.TestCase):
                 L F = (1+x)^2;
                 .sort
             ''')
-            self.assertRaises(RuntimeError, f.read, 'F')
+            self.assertRaises(FormError, f.read, 'F')
 
         # Undefined expressions.
         with form.open() as f:
@@ -113,7 +114,7 @@ class FormTestCase(unittest.TestCase):
                 L F = (1+x)^2;
                 .sort
             ''')
-            self.assertRaises(RuntimeError, f.read, 'G')
+            self.assertRaises(FormError, f.read, 'G')
 
         # Accesses to closed connections.
         with form.open() as f:
@@ -171,7 +172,7 @@ class FormTestCase(unittest.TestCase):
             f.write(script)
             try:
                 f.read('X')
-            except RuntimeError as e:
+            except FormError as e:
                 msg = str(e)
             self.assertTrue(msg is not None)
             # Neither F nor G appears in `msg`.
@@ -183,7 +184,7 @@ class FormTestCase(unittest.TestCase):
             f.write(script)
             try:
                 f.read('X')
-            except RuntimeError as e:
+            except FormError as e:
                 msg = str(e)
             self.assertTrue(msg is not None)
             # Both F and G appear in `msg`.
@@ -195,7 +196,7 @@ class FormTestCase(unittest.TestCase):
             f.write(script)
             try:
                 f.read('X')
-            except RuntimeError as e:
+            except FormError as e:
                 msg = str(e)
             self.assertTrue(msg is not None)
             # G is still in `msg' but F is not.
@@ -351,7 +352,7 @@ class FormTestCase(unittest.TestCase):
                 time.sleep(0.5)
 
                 signal.signal(signal.SIGALRM, cb_timeout_handler)
-                signal.alarm(2)
+                signal.alarm(10)
                 try:
                     func()
                 finally:

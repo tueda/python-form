@@ -14,7 +14,7 @@ Example
 4*p1.p2*p3.p4-4*p1.p3*p2.p4+4*p1.p4*p2.p3
 """
 
-from .formlink import FormLink
+from .formlink import FormError, FormLink  # noqa: F401
 
 
 def open(args=None, keep_log=False):

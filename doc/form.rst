@@ -6,3 +6,7 @@ form module
 
 .. autoclass:: form.FormLink
     :members:
+
+.. autoexception:: form.FormError
+    :members:
+    :show-inheritance:

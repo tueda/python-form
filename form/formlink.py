@@ -442,7 +442,7 @@ class FormLink(object):
                                         msg += '\n'
                                         msg += '\n'.join(self._log)
                                     self.close()
-                                    raise RuntimeError(msg)
+                                    raise FormError(msg)
                         self._loggingin.unread(s[i + 1:])
                 if self._parentin in r:
                     out += (self._parentin.read()
@@ -495,3 +495,11 @@ class FormLink(object):
                                         return y * 10000 + m * 100 + d
             raise ValueError('failed to parse "{0}"'.format(self._head))
         raise ValueError('no first line')
+
+
+class FormError(RuntimeError):
+    """FORM stopped by an error.
+
+    This exception is raised when :meth:`read() <form.FormLink.read>` finds
+    the FORM process stopped by some error.
+    """

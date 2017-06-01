@@ -13,7 +13,7 @@ import sys
 sys.path.insert(0, os.path.abspath('..'))
 
 # Import the package metadata from ../setup.py.
-from setup import _metadata  # noqa
+from setup import _metadata  # noqa: E402
 
 
 # -- General configuration ------------------------------------------------
