@@ -1,62 +1,48 @@
 language: python
 
-python:
-  - 2.6
-  - 2.7
-  - 3.2
-  - 3.3
-  - 3.4
-  - 3.5
-  - 3.6
-  - nightly
-  - pypy
-  - pypy3
-
-env:
-  - FORM_VERSION=4.1
-  - FORM_VERSION=4.1-snapshot-20170428
-
 matrix:
+  include:
+    - python: 2.7
+      env: TEST=lint
+    - python: 3.6
+      env: TEST=lint
+    - python: 2.6
+      env: TEST=test FORM_VERSION=4.2-pre
+    - python: 2.7
+      env: TEST=test FORM_VERSION=4.0
+    - python: 2.7
+      env: TEST=test FORM_VERSION=4.1
+    - python: 2.7
+      env: TEST=test FORM_VERSION=4.2-pre
+    - python: 3.2
+      env: TEST=test FORM_VERSION=4.2-pre
+    - python: 3.3
+      env: TEST=test FORM_VERSION=4.2-pre
+    - python: 3.4
+      env: TEST=test FORM_VERSION=4.2-pre
+    - python: 3.5
+      env: TEST=test FORM_VERSION=4.2-pre
+    - python: 3.6
+      env: TEST=test FORM_VERSION=4.0
+    - python: 3.6
+      env: TEST=test FORM_VERSION=4.1
+    - python: 3.6
+      env: TEST=test FORM_VERSION=4.2-pre
+    - python: nightly
+      env: TEST=test FORM_VERSION=4.2-pre
+    - python: pypy
+      env: TEST=test FORM_VERSION=4.2-pre
+    - python: pypy3
+      env: TEST=test FORM_VERSION=4.2-pre
   allow_failures:
     - python: nightly
+  fast_finish: true
 
-install:
-  # Install FORM.
-  - |
-    case "$FORM_VERSION" in
-      4.0-20120410)
-      form_url=https://github.com/vermaseren/form/releases/download/v4.0-20120410/form-4.0-20120410-x86_64-linux.tar.gz
-        ;;
-      4.1)
-        form_url=https://github.com/vermaseren/form/releases/download/v4.1-20131025/form-4.1-x86_64-linux.tar.gz
-        ;;
-      4.1-snapshot-20170428)
-        form_url=https://github.com/tueda/form/releases/download/v4.1-20131025-snapshot-20170428/form-4.1-20131025-snapshot-20170428-x86_64-linux.tar.gz
-        ;;
-    esac
-  - travis_retry wget $form_url
-  - tar xvf $(basename $form_url)
-  - export PATH=$PATH:$(pwd)/$(basename $form_url .tar.gz)
-  - form -v | grep -v sec
-  # Get installed.
-  - pip install .
-  # For Coveralls.
-  - |
-    case "$TRAVIS_PYTHON_VERSION" in
-      3.2)
-        travis_retry pip install coverage==3.7.1
-        ;;
-      *)
-        travis_retry pip install coverage
-        ;;
-    esac
-  - travis_retry pip install coveralls
+install: ./scripts/travis.sh install
 
-script:
-  - nosetests --with-coverage
+script: ./scripts/travis.sh script
 
-after_success:
-  - coveralls
+after_success: ./scripts/travis.sh after_success
 
 notifications:
   email: false
