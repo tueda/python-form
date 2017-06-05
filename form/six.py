@@ -12,4 +12,4 @@ PY32 = sys.version_info[0:2] >= (3, 2)
 if PY3:
     string_types = (str,)
 else:
-    string_types = (basestring,)
+    string_types = (basestring,)  # noqa: F821

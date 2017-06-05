@@ -47,7 +47,7 @@ class FormLink(object):
         # Ignore possible errors caused by subtle timing problems.
         try:
             self.close()
-        except:
+        except Exception:
             pass
 
     def __enter__(self):
@@ -415,7 +415,7 @@ class FormLink(object):
         result = []
         out = self._parentin.read0()
         out_start = 0  # start position for searching _END_MARK.
-        for e in names:
+        for _e in names:
             while True:
                 i = out.find(self._END_MARK, out_start)
                 if i >= 0:
