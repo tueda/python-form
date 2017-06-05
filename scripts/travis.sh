@@ -60,7 +60,7 @@ travis_test_install() {
   # Get python-form installed.
   pip install .
 
-  # For code coverage.
+  # For testing/code coverage.
   case "$TRAVIS_PYTHON_VERSION" in
     3.2)
       travis_retry pip install coverage==3.7.1
@@ -69,12 +69,12 @@ travis_test_install() {
       travis_retry pip install coverage
       ;;
   esac
-  travis_retry pip install coveralls
+  travis_retry pip install coveralls rednose nose-timer
 }
 
 travis_test_script() {
   export PATH=$PATH:$(pwd)/formbin
-  nosetests --with-coverage
+  nosetests --with-coverage --rednose --hide-skips --with-timer --timer-top-n 10
 }
 
 travis_test_after_success() {
