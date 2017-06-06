@@ -440,6 +440,41 @@ class Polynomial(object):
             return Polynomial('rem_({0},{1})'.format(other, self._id), False)
         return NotImplemented
 
+    def __truediv__(self, other):
+        """Return self / other.
+
+        Examples
+        --------
+        >>> p = Polynomial('1+x')
+        >>> q = Polynomial('1-x')
+        >>> p / q
+        RationalFunction('1+x', '1-x')
+
+        """
+        from .rat import RationalFunction
+        if isinstance(other, (Polynomial, integer_types)):
+            return RationalFunction(self, other)
+        return NotImplemented
+
+    def __rtruediv__(self, other):
+        """Return other / self.
+
+        Examples
+        --------
+        >>> p = Polynomial('1+x')
+        >>> 1 / p
+        RationalFunction('1', '1+x')
+
+        """
+        from .rat import RationalFunction
+        if isinstance(other, integer_types):
+            return RationalFunction(other, self)
+        return NotImplemented
+
+    # For Python 2.
+    __div__ = __truediv__
+    __rdiv__ = __rtruediv__
+
     def factorize(self):
         """Return a generator iterating factors of the polynomial.
 

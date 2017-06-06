@@ -7,3 +7,4 @@ on large expressions on disks are not accessible in this way.
 """
 
 from .poly import Polynomial, gcd, lcm  # noqa: F401
+from .rat import RationalFunction  # noqa: F401

@@ -49,6 +49,16 @@ class TokenList(object):
         self.pos -= 1
 
 
+def is_unsigned_integer(s):
+    """Return True if the given string looks like an unsigned integer."""
+    return re.match(r'^\s*[1-9]*[0-9]\s*$', s)
+
+
+def is_signed_integer(s):
+    """Return True if the given string looks like a signed integer."""
+    return re.match(r'^[+\-\s]*[1-9]*[0-9]\s*$', s)
+
+
 def is_symbol(s):
     """Return True if the given string looks like a symbol."""
     return re.match(r'^\s*[a-zA-Z][0-9a-zA-Z]*\s*$', s)
