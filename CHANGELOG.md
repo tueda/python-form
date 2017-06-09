@@ -1,5 +1,15 @@
 # Change Log
 
+## Unreleased
+
+### Changed
+
+- `FormError` is raised when `FormLink.read()` finds the FORM process stopped by
+  some error (previously `RuntimeError`).
+  ([1e1ae33](https://github.com/tueda/python-form/commit/1e1ae33))
+
+[Full changes...](https://github.com/tueda/python-form/compare/v0.2.1...HEAD)
+
 ## [0.2.1](https://github.com/tueda/python-form/releases/tag/v0.2.1) (2017-05-31)
 
 - This version came with document enhancement.
