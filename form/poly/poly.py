@@ -3,7 +3,7 @@
 from fractions import Fraction
 
 from . import singleton
-from .parser import is_expression, is_lhs, is_symbol
+from .parser import is_expression, is_lhs, is_symbol, split_terms
 from ..six import integer_types, string_types
 
 
@@ -56,6 +56,12 @@ class Polynomial(object):
     Polynomial('1+4*x+6*x^2+4*x^3+x^4')
     >>> len(p)
     5
+
+    A polynomial as a collection of terms:
+
+    >>> p = Polynomial('1+2*x+x^2')
+    >>> [t for t in p]
+    [Polynomial('1'), Polynomial('2*x'), Polynomial('x^2')]
 
     Equality operators:
 
@@ -233,6 +239,12 @@ class Polynomial(object):
             self._form.write('#$t=termsin_({0});'.format(self._id))
             self._len = int(self._form.read('$t'))
         return self._len
+
+    def __iter__(self):
+        """Return an iterator for all terms in the polynomial."""
+        if self:
+            for t in split_terms(str(self)):
+                yield Polynomial(t, False)
 
     @property
     def is_zero(self):

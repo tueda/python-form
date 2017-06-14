@@ -146,6 +146,26 @@ class FormPolyTestCase(unittest.TestCase):
         self.assertRaises(TypeError, lambda: p / q)
         self.assertRaises(TypeError, lambda: 1 / p)
 
+    def test_iter(self):
+        """Test for iteration over polynomials."""
+        def check(p):
+            s = 0
+            n = 0
+            for t in p:
+                s += t
+                n += 1
+            self.assertEqual(n, len(p))
+            self.assertEqual(s, p)
+
+        p = Polynomial('(1+x+y)^3')
+        check(p)
+
+        p = Polynomial('(-1+x/y+z)^3')
+        check(p)
+
+        p = Polynomial('(-1/2+3*x*y+1/y^4+31/71*z^5)^3/3')
+        check(p)
+
     def test_attr(self):
         """Test for polynomial attributes."""
         from fractions import Fraction

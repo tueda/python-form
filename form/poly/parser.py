@@ -58,16 +58,18 @@ def is_lhs(s):
     """Return True if the given string looks like a LHS."""
     return re.match((
         r'^\s*'
+        # x^n
         r'(?:'
         r'[a-zA-Z][0-9a-zA-Z]*'
         r'\s*'
         r'(?:'
         r'\^'
         r'\s*'
-        r'[+-]*[1-9]*[0-9]'
+        r'[+-]*[1-9][0-9]*'
         r'\s*'
         r')?'
         r')'
+        # optional ('*' | '/') x^n
         r'(?:'
         r'[*/]'
         r'\s*'
@@ -76,14 +78,17 @@ def is_lhs(s):
         r'(?:'
         r'\^'
         r'\s*'
-        r'[+-]*[1-9]*[0-9]'
+        r'[+-]*[1-9][0-9]*'
         r'\s*'
         r')?'
         r')*'
+
         r'\s*$'
     ), s) or re.match((
         r'^\s*'
+        # 1
         r'1\s*'
+        # optional ('*' | '/') x^n
         r'(?:'
         r'[*/]'
         r'\s*'
@@ -92,10 +97,11 @@ def is_lhs(s):
         r'(?:'
         r'\^'
         r'\s*'
-        r'[+-]*[1-9]*[0-9]'
+        r'[+-]*[1-9][0-9]*'
         r'\s*'
         r')?'
         r')*'
+
         r'\s*$'
     ), s)
 
@@ -168,3 +174,41 @@ def _is_factor(tokens):
         if not _is_expression(tokens):
             tokens.unconsume()
     return True
+
+
+_term_scanner = re.Scanner([
+    ((
+        # optional '+' or '-'
+        r'[+-]?'
+        # n
+        r'[1-9][0-9]*'
+        # optional '/' n.
+        r'(?:/[1-9][0-9]*)?'
+        # optional x or x^n
+        r'(?:'
+        r'\*'
+        r'[a-zA-Z][0-9a-zA-Z]*'
+        r'(?:\^-?[1-9][0-9]*)?'
+        r')*'
+    ), lambda self, token: token),
+    ((
+        # optional '+' or '-'
+        r'[+-]?'
+        # x or x^n
+        r'[a-zA-Z][0-9a-zA-Z]*'
+        r'(?:\^-?[1-9][0-9]*)?'
+        # optional x or x^n
+        r'(?:'
+        r'\*'
+        r'[a-zA-Z][0-9a-zA-Z]*'
+        r'(?:\^-?[1-9][0-9]*)?'
+        r')*'
+    ), lambda self, token: token),
+])
+
+
+def split_terms(s):
+    """Split terms in the expanded form."""
+    terms, reminder = _term_scanner.scan(s)
+    assert(not reminder)
+    return terms
