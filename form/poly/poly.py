@@ -635,8 +635,9 @@ class Polynomial(object):
     def degree(self, x, f=max, check=True):
         """Return the degree with respect to ``x``.
 
-        Return the degree with respect to ``x``, which must be a symbol.
-        The second argument specifies how the set of exponents are treated:
+        Return the degree with respect to ``x``, which must be a symbol or
+        a list of symbols. The second argument specifies how the set of
+        exponents are treated:
 
         ======== =============================
           f        meaning
@@ -659,28 +660,43 @@ class Polynomial(object):
         >>> p.degree('x', set) == set([1, 3, 6])
         True
 
+        When a list of symbols is given, the total degree for the symbols is
+        considered.
+
+        >>> p = Polynomial('1+x+y+z') ** 2
+        >>> p
+        Polynomial('1+2*z+z^2+2*y+2*y*z+y^2+2*x+2*x*z+2*x*y+x^2')
+        >>> p.degree(['x', 'y'], list)
+        [0, 0, 0, 1, 1, 2, 1, 1, 2, 2]
+
         """
-        if isinstance(x, string_types):
-            if check and not is_symbol(x):
-                raise ValueError('symbol expected: {0}'.format(repr(x)))
-        elif isinstance(x, Polynomial):
-            if check:
-                if not x.is_symbol:
+        def _check(x):
+            if isinstance(x, string_types):
+                if check and not is_symbol(x):
                     raise ValueError('symbol expected: {0}'.format(repr(x)))
-                x = str(x)
+                return '{0},1'.format(x)
+            elif isinstance(x, Polynomial):
+                if check:
+                    if not x.is_symbol:
+                        raise ValueError('symbol expected: {0}'.format(
+                            repr(x)))
+                return "`{0}',1".format(x._id)
             else:
-                x = "`{0}'".format(x._id)
+                raise TypeError('symbol expected: {0}'.format(repr(x)))
+
+        if isinstance(x, (tuple, list, set, frozenset)) and x:
+            count_args = ','.join(_check(y) for y in x)
         else:
-            raise TypeError('symbol expected: {0}'.format(repr(x)))
+            count_args = _check(x)
 
         if f is max:
             # XXX: the minimum power assumed.
             self._form.write((
                 '#$t=-32768;\n'
                 '#inside {0}\n'
-                'if(count({1},1)>$t)$t=count_({1},1);\n'
+                'if(count({1})>$t)$t=count_({1});\n'
                 '#endinside'
-            ).format(self._id, x))
+            ).format(self._id, count_args))
             n = int(self._form.read('$t'))
             if n == -32768:
                 n = 0
@@ -690,9 +706,9 @@ class Polynomial(object):
             self._form.write((
                 '#$t=32767;\n'
                 '#inside {0}\n'
-                'if(count({1},1)<$t)$t=count_({1},1);\n'
+                'if(count({1})<$t)$t=count_({1});\n'
                 '#endinside'
-            ).format(self._id, x))
+            ).format(self._id, count_args))
             n = int(self._form.read('$t'))
             if n == 32767:
                 n = 0
@@ -702,12 +718,12 @@ class Polynomial(object):
             self._form.write((
                 '#$t=dum_();\n'
                 '#inside {0}\n'
-                '$t1=count_({1},1);\n'
+                '$t1=count_({1});\n'
                 'inside $t;\n'
                 'id dum_(?a)=dum_(?a,$t1);\n'
                 'endinside;\n'
                 '#endinside'
-            ).format(self._id, x))
+            ).format(self._id, count_args))
             s = self._form.read('$t')[1:-1]
             if not s:
                 return []
