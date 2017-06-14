@@ -886,6 +886,8 @@ def gcd(*polynomials):
         raise TypeError('gcd() takes one or more arguments')
     if len(polynomials) == 1:
         # GCD(a) = a.
+        if isinstance(polynomials, (set, frozenset)):
+            polynomials = tuple(polynomials)
         return (polynomials[0] if isinstance(polynomials[0], Polynomial)
                 else Polynomial(polynomials[0], False))
 
@@ -948,6 +950,8 @@ def lcm(*polynomials):
         raise TypeError('lcm() takes one or more arguments')
     if len(polynomials) == 1:
         # LCM(a) = a.
+        if isinstance(polynomials, (set, frozenset)):
+            polynomials = tuple(polynomials)
         return (polynomials[0] if isinstance(polynomials[0], Polynomial)
                 else Polynomial(polynomials[0], False))
 

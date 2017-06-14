@@ -352,6 +352,9 @@ class FormPolyTestCase(unittest.TestCase):
         self.assertEqual(gcd(p1, p2), p3)
         self.assertEqual(gcd(p0, p1, p0, p0, p2, p0), p3)
 
+        self.assertEqual(gcd(set([p1])), p1)
+        self.assertEqual(gcd(set([p1, p2])), p3)
+
     @unittest.skipIf(form._dateversion < 20150805, 'form bug')
     def test_gcd2(self):
         """Test polynomial GCD (2)."""
@@ -387,6 +390,9 @@ class FormPolyTestCase(unittest.TestCase):
         self.assertEqual(lcm(p0, p1), 0)
         self.assertEqual(lcm(p1, p2), p3)
         self.assertEqual(lcm(p0, p1, p0, p0, p2, p0), 0)
+
+        self.assertEqual(lcm(set([p1])), p1)
+        self.assertEqual(lcm(set([p1, p2])), p3)
 
     @unittest.skipIf(form._dateversion < 20150805, 'form bug')
     def test_lcm2(self):
