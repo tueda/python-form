@@ -337,6 +337,10 @@ class Polynomial(object):
         if isinstance(other, Polynomial):
             if len(self) != len(other):
                 return False
+            if self._str is not None and other._str is not None:
+                # When the string representations of the both are known,
+                # make use of them.
+                return self._str == other._str
             self._form.write('#$t={0}-{1};\n#$t=nterms_($t);'.format(
                 self._id, other._id))
             return self._form.read('$t') == '0'
