@@ -3,7 +3,8 @@
 from fractions import Fraction
 
 from . import singleton
-from .parser import is_expression, is_lhs, is_symbol, split_terms
+from .parser import (is_expression, is_lhs, is_symbol, split_symbols,
+                     split_terms)
 from ..six import integer_types, string_types
 
 
@@ -890,6 +891,54 @@ class Polynomial(object):
         ))
         p._clear_cache()
         return p
+
+
+def symbols(names, seq=False):
+    """Translate a string to symbols and return them as polynomials.
+
+    Examples
+    --------
+    The ``names`` argument can be a string with commas or whitespaces as
+    delimiters.
+    >>> symbols('x,y,z')
+    [Polynomial('x'), Polynomial('y'), Polynomial('z')]
+    >>> symbols('a b c')
+    [Polynomial('a'), Polynomial('b'), Polynomial('c')]
+
+    >>> symbols('x')
+    Polynomial('x')
+    >>> symbols('x,y')
+    [Polynomial('x'), Polynomial('y')]
+    >>> symbols('x,y,z')
+    [Polynomial('x'), Polynomial('y'), Polynomial('z')]
+
+    A trailing ``,`` or setting ``seq=True`` guarantees that the return value
+    is a list.
+    >>> symbols('x,')
+    [Polynomial('x')]
+    >>> symbols('x', seq=True)
+    [Polynomial('x')]
+
+    Triple dot operators ``...`` are expanded for symbols containing
+    non-negative numbers unless ambiguous.
+    >>> symbols('x1,...,x3')
+    [Polynomial('x1'), Polynomial('x2'), Polynomial('x3')]
+    >>> symbols('x1y11z2...x3y9z2')
+    [Polynomial('x1y11z2'), Polynomial('x2y10z2'), Polynomial('x3y9z2')]
+
+    """
+    if not isinstance(names, string_types):
+        raise TypeError('string expected: {0}'.format(repr(names)))
+
+    a = split_symbols(names, seq)
+
+    if not a:
+        raise ValueError('no symbols given')
+
+    if isinstance(a, string_types):
+        return Polynomial(a, False)
+
+    return [Polynomial(x, False) for x in a]
 
 
 def gcd(*polynomials):

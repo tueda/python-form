@@ -8,4 +8,4 @@ operations on terms in large expressions on disks are not accessible in this
 way.
 """
 
-from .poly import Polynomial, gcd, lcm  # noqa: F401
+from .poly import Polynomial, gcd, lcm, symbols  # noqa: F401

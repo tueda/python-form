@@ -2,7 +2,7 @@
 
 import unittest
 
-from form.poly import Polynomial, gcd, lcm
+from form.poly import Polynomial, gcd, lcm, symbols
 
 form = Polynomial.get_instance()
 
@@ -347,6 +347,45 @@ class FormPolyTestCase(unittest.TestCase):
             p.subs('x*y^2', '-1'),
             Polynomial(('-11+6*y^2+4*y^3+y^4-2*x+12*x*y+6*x^2+12*x^2*y+4*x^3'
                         '+4*x^3*y+x^4'))
+        )
+
+    def test_symbols(self):
+        """Test for symbols()."""
+        o = object()
+
+        self.assertRaises(TypeError, lambda: symbols(o))
+        self.assertRaises(ValueError, lambda: symbols(''))
+
+        self.assertRaises(ValueError, lambda: symbols('?'))
+        self.assertRaises(ValueError, lambda: symbols('3*x'))
+        self.assertRaises(ValueError, lambda: symbols('x+y'))
+        self.assertRaises(ValueError, lambda: symbols('x^2'))
+
+        self.assertRaises(ValueError, lambda: symbols('...'))
+        self.assertRaises(ValueError, lambda: symbols('...,a3'))
+        self.assertRaises(ValueError, lambda: symbols('a3,...'))
+        self.assertRaises(ValueError, lambda: symbols('a,...3'))
+        self.assertRaises(ValueError, lambda: symbols('a,...b'))
+        self.assertRaises(ValueError, lambda: symbols('a1b2,...a5b4'))
+
+        self.assertEqual(
+            symbols('x,y,z'),
+            [Polynomial('x'), Polynomial('y'), Polynomial('z')]
+        )
+
+        self.assertEqual(
+            symbols('x  y  z'),
+            [Polynomial('x'), Polynomial('y'), Polynomial('z')]
+        )
+
+        self.assertEqual(
+            symbols('a1,...,a3'),
+            [Polynomial('a1'), Polynomial('a2'), Polynomial('a3')]
+        )
+
+        self.assertEqual(
+            symbols('a1...a3'),
+            [Polynomial('a1'), Polynomial('a2'), Polynomial('a3')]
         )
 
     def test_gcd(self):
