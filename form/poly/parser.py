@@ -58,6 +58,12 @@ def is_symbol(s):
     return match(r'^\s*[a-zA-Z][0-9a-zA-Z]*\s*$', s) is not None
 
 
+def is_bracketed_symbol(s):
+    """Return True for a symbol with a squared bracket."""
+    # XXX: no nesting
+    return match(r'^\s*\[[^\[\]]+\]\s*$', s) is not None
+
+
 def is_lhs(s):
     """Return True if the given string looks like a LHS."""
     return match((
@@ -206,7 +212,7 @@ _term_scanner = Scanner([
         # optional x or x^n
         r'(?:'
         r'\*'
-        r'[a-zA-Z][0-9a-zA-Z]*'
+        r'(?:[a-zA-Z][0-9a-zA-Z]*|\[[^\[\]]+\])'
         r'(?:\^-?[1-9][0-9]*)?'
         r')*'
     ), lambda self, token: token),
@@ -214,12 +220,12 @@ _term_scanner = Scanner([
         # optional '+' or '-'
         r'[+-]?'
         # x or x^n
-        r'[a-zA-Z][0-9a-zA-Z]*'
+        r'(?:[a-zA-Z][0-9a-zA-Z]*|\[[^\[\]]+\])'
         r'(?:\^-?[1-9][0-9]*)?'
         # optional x or x^n
         r'(?:'
         r'\*'
-        r'[a-zA-Z][0-9a-zA-Z]*'
+        r'(?:[a-zA-Z][0-9a-zA-Z]*|\[[^\[\]]+\])'
         r'(?:\^-?[1-9][0-9]*)?'
         r')*'
     ), lambda self, token: token),

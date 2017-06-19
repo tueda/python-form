@@ -3,8 +3,8 @@
 from fractions import Fraction
 
 from . import singleton
-from .parser import (is_expression, is_lhs, is_symbol, split_symbols,
-                     split_terms)
+from .parser import (is_bracketed_symbol, is_expression, is_lhs, is_symbol,
+                     split_symbols, split_terms)
 from ..six import integer_types, string_types
 
 
@@ -278,7 +278,8 @@ class Polynomial(object):
     @property
     def is_symbol(self):
         """Return True if the polynomial is a symbol."""
-        return len(self) == 1 and is_symbol(str(self))
+        return (len(self) == 1 and
+                (is_symbol(str(self)) or is_bracketed_symbol(str(self))))
 
     @property
     def unit(self):
