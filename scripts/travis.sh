@@ -44,8 +44,8 @@ travis_test_install() {
       form_url=https://github.com/vermaseren/form/releases/download/v4.1-20131025/form-4.1-x86_64-linux.tar.gz
       ;;
     4.2-pre)
-      # v4.1-20131025-340-gbcde8c9 (2017-04-28)
-      form_url=https://github.com/tueda/form/releases/download/v4.1-20131025-snapshot-20170428/form-4.1-20131025-snapshot-20170428-x86_64-linux.tar.gz
+      # v4.1-20131025-356-g541f847 (2017-06-14)
+      form_url=https://github.com/tueda/form-snapshot/releases/download/v4.1-20131025-356-g541f847/form-4.1-20131025-356-g541f847-x86_64-linux.tar.gz
       ;;
     *)
       echo "Error: unsupported FORM_VERSION=$FORM_VERSION" >&2
