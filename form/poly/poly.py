@@ -951,6 +951,7 @@ def symbols(names, seq=False):
     --------
     The ``names`` argument can be a string with commas or whitespaces as
     delimiters.
+
     >>> symbols('x,y,z')
     [Polynomial('x'), Polynomial('y'), Polynomial('z')]
     >>> symbols('a b c')
@@ -965,6 +966,7 @@ def symbols(names, seq=False):
 
     A trailing ``,`` or setting ``seq=True`` guarantees that the return value
     is a list.
+
     >>> symbols('x,')
     [Polynomial('x')]
     >>> symbols('x', seq=True)
@@ -972,6 +974,7 @@ def symbols(names, seq=False):
 
     Triple dot operators ``...`` are expanded for symbols containing
     non-negative numbers unless ambiguous.
+
     >>> symbols('x1,...,x3')
     [Polynomial('x1'), Polynomial('x2'), Polynomial('x3')]
     >>> symbols('x1y11z2...x3y9z2')

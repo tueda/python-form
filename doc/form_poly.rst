@@ -10,3 +10,5 @@ form.poly module
 .. autofunction:: form.poly.gcd
 
 .. autofunction:: form.poly.lcm
+
+.. autofunction:: form.poly.symbols
