@@ -15,10 +15,13 @@ class Polynomial(object):
     coefficients stored in the expanded form as a $-variable in FORM.
     Many standard operators (i.e., ``+``, ``-``, ``*``) are supported.
 
+    Some methods have an option ``check``, which is ``True`` in default and
+    enables checking of the validity of the input.
+
     Examples
     --------
     Create polynomials. All identifiers (matching to the regular expression
-    ``[a-zA-Z][0-9a-zA-Z]*``) are recoginized as symbols:
+    ``[a-zA-Z][0-9a-zA-Z]*``) are recognized as symbols:
 
     >>> Polynomial(5)
     Polynomial('5')
@@ -88,8 +91,14 @@ class Polynomial(object):
     >>> f == q * g + r
     True
 
-    >>> g / 2
-    Polynomial('1/2*a+x')
+    Exact division (for a single-term divisor):
+
+    >>> p = Polynomial('2-x^2')
+    >>> x = Polynomial('2*x')
+    >>> p / 2
+    Polynomial('1-1/2*x^2')
+    >>> p / x
+    Polynomial('x^-1-1/2*x')
 
     """
 

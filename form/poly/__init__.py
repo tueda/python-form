@@ -6,6 +6,27 @@ a considerable amount of preprocessor instructions with some overheads. Note
 that the most powerful features of FORM, i.e., possibly parallelized SIMD
 operations on terms in large expressions on disks are not accessible in this
 way.
+
+Examples
+--------
+>>> from form.poly import Polynomial
+>>> def legendre_poly(n, x):
+...     assert n >= 0
+...     if n == 0:
+...         return Polynomial(1)
+...     elif n == 1:
+...         return Polynomial(x)
+...     return ((2 * n - 1) * Polynomial(x) * legendre_poly(n - 1, x) -
+...             (n - 1) * legendre_poly(n - 2, x)) / n
+>>> for n in range(6):
+...     print('P_{0}(z) = {1}'.format(n, legendre_poly(n, 'z')))
+P_0(z) = 1
+P_1(z) = z
+P_2(z) = -1/2+3/2*z^2
+P_3(z) = -3/2*z+5/2*z^3
+P_4(z) = 3/8-15/4*z^2+35/8*z^4
+P_5(z) = 15/8*z-35/4*z^3+63/8*z^5
+
 """
 
 from .poly import Polynomial, gcd, lcm, symbols  # noqa: F401
