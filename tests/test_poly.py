@@ -223,6 +223,35 @@ class FormPolyTestCase(unittest.TestCase):
         self.assertEqual(p6.unit, 1)
         self.assertEqual(p7.unit, -1)
 
+    def test_interpret_symbols(self):
+        """Test for Polynomial._interpret_symbols()."""
+        def assert_raises(error, *args):
+            self.assertRaises(
+                error, lambda: Polynomial._interpret_symbols(*args))
+
+        def assert_equal(*args):
+            self.assertEqual(
+                Polynomial._interpret_symbols(*args[:-1]), args[-1])
+
+        p = Polynomial('1+x')
+        q = Polynomial('2*x')
+        o = object()
+
+        assert_raises(ValueError, '')
+        assert_raises(ValueError, 'x>0')
+        assert_raises(ValueError, p)
+        assert_raises(ValueError, q)
+        assert_raises(ValueError, [])
+        assert_raises(ValueError, ['1+x'])
+        assert_raises(ValueError, ['x y'])
+        assert_raises(ValueError, [p])
+        assert_raises(ValueError, [q])
+        assert_raises(TypeError, [o])
+        assert_raises(TypeError, o)
+
+        assert_equal('x', ['x'])
+        assert_equal('x y', ['x', 'y'])
+
     def test_factorize(self):
         """Test polynomial factorization."""
         p1 = Polynomial('-3+x*y')
@@ -243,33 +272,49 @@ class FormPolyTestCase(unittest.TestCase):
         q = Polynomial('1-x')
         o = object()
 
+        self.assertRaises(ValueError, lambda: p.degree(''))
+        self.assertRaises(ValueError, lambda: p.degree('x>0'))
+        self.assertRaises(ValueError, lambda: p.degree(q))
+        self.assertRaises(ValueError, lambda: p.degree([]))
+
         self.assertRaises(ValueError, lambda: p.degree('1+x'))
         self.assertRaises(ValueError, lambda: p.degree('x*y'))
-        self.assertRaises(ValueError, lambda: p.degree(q))
         self.assertRaises(TypeError, lambda: p.degree(o))
-        self.assertRaises(ValueError, lambda: p.degree('x', lambda x: x))
+        self.assertRaises(ValueError, lambda: p.degree('x', f=lambda x: x))
 
-        self.assertEqual(p.degree('y', max), 0)
-        self.assertEqual(p.degree('y', min), 0)
-        self.assertEqual(p.degree('y', list), [0, 0])
-        self.assertEqual(p.degree('y', set), set([0, 0]))
+        self.assertEqual(p.degree('y', f=max), 0)
+        self.assertEqual(p.degree('y', f=min), 0)
+        self.assertEqual(p.degree('y', f=list), [0, 0])
+        self.assertEqual(p.degree('y', f=set), set([0, 0]))
 
         p = Polynomial(0)
 
-        self.assertEqual(p.degree('x', max), 0)
-        self.assertEqual(p.degree('x', min), 0)
-        self.assertEqual(p.degree('x', list), [])
-        self.assertEqual(p.degree('x', set), set([]))
+        self.assertEqual(p.degree('x', f=max), 0)
+        self.assertEqual(p.degree('x', f=min), 0)
+        self.assertEqual(p.degree('x', f=list), [])
+        self.assertEqual(p.degree('x', f=set), set([]))
 
         p = Polynomial('x^3 + x^8 + x^10') * Polynomial('1+y')
         x = Polynomial('x')
+        y = Polynomial('y')
 
         self.assertEqual(p.degree(x), 10)
-        self.assertEqual(p.degree(x, min), 3)
-        self.assertEqual(p.degree(x, list), [3, 3, 8, 8, 10, 10])
-        self.assertEqual(p.degree(x, set), set([3, 8, 10]))
+        self.assertEqual(p.degree(x, f=min), 3)
+        self.assertEqual(p.degree(x, f=list), [3, 3, 8, 8, 10, 10])
+        self.assertEqual(p.degree(x, f=set), set([3, 8, 10]))
 
-        self.assertEqual(p.degree(x, max, False), 10)
+        self.assertEqual(p.degree(x, f=max, check=False), 10)
+
+        p = Polynomial('x^2*y^5')
+
+        self.assertRaises(TypeError, lambda: p.degree('x', w=o))
+        self.assertRaises(TypeError, lambda: p.degree('x', w=[o]))
+        self.assertRaises(ValueError, lambda: p.degree('x y', w=1))
+
+        self.assertEqual(p.degree('x', w=1), 2)
+        self.assertEqual(p.degree('x y', w=[1, 2]), 12)
+        self.assertEqual(p.degree(['x', 'y'], w=[1, 2]), 12)
+        self.assertEqual(p.degree([x, y], w=[1, 2]), 12)
 
     def test_coefficient(self):
         """Test for Polynomial.coefficient()."""

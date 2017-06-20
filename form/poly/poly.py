@@ -633,6 +633,39 @@ class Polynomial(object):
     __div__ = __truediv__
     __rdiv__ = __rtruediv__
 
+    @staticmethod
+    def _interpret_symbols(x, check=True):
+        """Try to interpret ``x`` as symbols and return a list of strings."""
+        if isinstance(x, string_types):
+            a = split_symbols(x, True)
+            if not a:
+                raise ValueError('symbol(s) expected: {0}'.format(x))
+            return a
+        if isinstance(x, Polynomial):
+            if check and not x.is_symbol:
+                raise ValueError('symbol expected: {0}'.format(
+                    repr(x)))
+            return ["`{0}'".format(x._id)]
+        if isinstance(x, (tuple, list, set, frozenset)):
+            if not x:
+                raise ValueError('symbol(s) expected: {0}'.format(x))
+
+            def _check(x):
+                if isinstance(x, string_types):
+                    if check and not is_symbol(x):
+                        raise ValueError('symbol expected: {0}'.format(
+                            repr(x)))
+                    return x
+                if isinstance(x, Polynomial):
+                    if check and not x.is_symbol:
+                        raise ValueError('symbol expected: {0}'.format(
+                            repr(x)))
+                    return "`{0}'".format(x._id)
+                raise TypeError('symbol expected: {0}'.format(repr(x)))
+
+            return [_check(y) for y in x]
+        raise TypeError('symbol(s) expected: {0}'.format(repr(x)))
+
     def factorize(self):
         """Return a generator iterating factors of the polynomial.
 
@@ -659,12 +692,13 @@ class Polynomial(object):
 
         return factorization_generator()
 
-    def degree(self, x, f=max, check=True):
+    def degree(self, x, w=None, f=max, check=True):
         """Return the degree with respect to ``x``.
 
-        Return the degree with respect to ``x``, which must be a symbol or
-        a list of symbols. The second argument specifies how the set of
-        exponents are treated:
+        Return the degree of the polynomial with respect to ``x``, which must
+        be a symbol or symbols. The optional argument ``w`` gives integer
+        weights, which are ``1`` in default. Another optional argument ``f``
+        specifies a function to manipulate the set of exponents:
 
         ======== =============================
           f        meaning
@@ -680,41 +714,48 @@ class Polynomial(object):
         >>> p = Polynomial('a*x + b*x + c*x^3 + d*x^6')
         >>> p.degree('x')
         6
-        >>> p.degree('x', min)
+        >>> p.degree('x', f=min)
         1
-        >>> p.degree('x', list) == [1, 1, 3, 6]
+        >>> p.degree('x', f=list) == [1, 1, 3, 6]
         True
-        >>> p.degree('x', set) == set([1, 3, 6])
+        >>> p.degree('x', f=set) == set([1, 3, 6])
         True
 
-        When a list of symbols is given, the total degree for the symbols is
-        considered.
+        When a list of symbols is given, the total degree is considered.
 
         >>> p = Polynomial('1+x+y+z') ** 2
         >>> p
         Polynomial('1+2*z+z^2+2*y+2*y*z+y^2+2*x+2*x*z+2*x*y+x^2')
-        >>> p.degree(['x', 'y'], list)
+        >>> p.degree(['x', 'y'], f=list)
         [0, 0, 0, 1, 1, 2, 1, 1, 2, 2]
 
-        """
-        def _check(x):
-            if isinstance(x, string_types):
-                if check and not is_symbol(x):
-                    raise ValueError('symbol expected: {0}'.format(repr(x)))
-                return '{0},1'.format(x)
-            elif isinstance(x, Polynomial):
-                if check:
-                    if not x.is_symbol:
-                        raise ValueError('symbol expected: {0}'.format(
-                            repr(x)))
-                return "`{0}',1".format(x._id)
-            else:
-                raise TypeError('symbol expected: {0}'.format(repr(x)))
+        Degrees with the weight option:
 
-        if isinstance(x, (tuple, list, set, frozenset)) and x:
-            count_args = ','.join(_check(y) for y in x)
+        >>> p = Polynomial('x^2*y^5')
+        >>> p.degree(['x', 'y'])
+        7
+        >>> p.degree(['x', 'y'], w=[1, 2])
+        12
+        >>> p.degree(['x', 'y'], w=[1, -1])
+        -3
+
+        """
+        x = self._interpret_symbols(x, check)
+
+        if w is None:
+            count_args = ','.join('{0},1'.format(y) for y in x)
         else:
-            count_args = _check(x)
+            if isinstance(w, integer_types):
+                w = (w,)
+            elif (not isinstance(w, (tuple, list)) or
+                    any(not isinstance(y, integer_types) for y in w)):
+                raise TypeError('integer weight(s) expected: {0}'.format(
+                    repr(w)))
+            if len(x) != len(w):
+                raise ValueError((
+                    'number of symbols and that of weights mismatch: '
+                    '{0}, {1}').format(repr(x), repr(w)))
+            count_args = ','.join('{0},{1}'.format(y, z) for y, z in zip(x, w))
 
         if f is max:
             # XXX: the minimum power assumed.
@@ -756,7 +797,7 @@ class Polynomial(object):
                 return []
             return [int(i) for i in s.split(',')]
         if f is set:
-            return set(self.degree(x, list))
+            return set(self.degree(x, w, list, False))
         raise ValueError('invalid degree specification: {0}'.format(repr(f)))
 
     def coefficient(self, x, n, check=True):
