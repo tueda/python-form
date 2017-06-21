@@ -81,6 +81,10 @@ class FormPolyTestCase(unittest.TestCase):
         self.assertRaises(ValueError, Polynomial, '1+x^y')  # exp_
         self.assertRaises(ValueError, Polynomial, 'x+1/(1+x)')  # denom_
 
+        p = Polynomial('x')  # noqa: F841
+        Polynomial.get_instance().close()
+        # Expect that CPython calls p.__del__() on exiting the scope.
+
     def test_hashable(self):
         """Test for the hashable nature of polynomials."""
         lst1 = [Polynomial(x) for x in ('a', 'b', 'c', 'f')]
