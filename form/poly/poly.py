@@ -103,6 +103,7 @@ class Polynomial(object):
     """
 
     _form = None  # The singleton.
+    _have_putinside = False  # PutInside statement
     _have_gcd0 = False  # correct gcd_(0,a)
     _have_mul = False  # mul_ function
 
@@ -121,6 +122,10 @@ class Polynomial(object):
             # Check FORM features/bugs.
 
             def h(f):
+                # PutInside: FORM 4.0 (Mar 14 2013, v4.0-20120410-80-ge1fa9be)
+                # Issue vermaseren/form#30 (fixed on 20160804) should be
+                # irrelevant for our usage.
+                cls._have_putinside = f._dateversion >= 20130314
                 # gcd(0,a): FORM 4.1 (Jun  8 2017, v4.1-20131025-352-g7cf7c42)
                 cls._have_gcd0 = f._dateversion > 20170608
                 # mul_: FORM 4.1 (Jun 10 2017, v4.1-20131025-355-g0bf5c58)
@@ -840,6 +845,95 @@ class Polynomial(object):
         ).format(p._id, x, n))
         p._clear_cache()
         return p
+
+    def exponent_vectors(self, x, check=True):
+        """Return the exponent vectors with respect to ``x``.
+
+        Extract the exponent vectors from the polynomial with respect to ``x``
+        and return the result as a list, where ``x`` must be a symbol or
+        symbols. For each element of the result, the corresponding coefficient
+        is appended at the end.
+
+        Examples
+        --------
+        >>> p = Polynomial('a*x*y^2+b*x^2*y')
+        >>> p.exponent_vectors(['x', 'y'])
+        [[1, 2, Polynomial('a')], [2, 1, Polynomial('b')]]
+
+        """
+        xx = self._interpret_symbols(x, check)
+
+        if check and len(xx) >= 2:
+            # Duplications of symbols may lead to freezing. Avoid any of them.
+            xxx = xx
+            if not isinstance(x, string_types):
+                assert isinstance(x, (tuple, list, set, frozenset))
+                # The following lines are needed to detect duplications by
+                # polynomials with different ids.
+                if any(isinstance(y, Polynomial) for y in x):
+                    xxx = [str(y) if isinstance(y, Polynomial) else y
+                           for y in x]
+            x_set = set(xxx)
+            if len(x_set) != len(xxx):
+                raise ValueError('duplicated symbols: {0}'.format(x))
+
+        x = xx
+
+        self._form.write((
+            '#$t={0};\n'
+            '#inside $t\n'
+            'id {1}=dum_({2});\n'
+            'antiputinside dum_,dum_;\n'
+            '#endinside'
+            if self._have_putinside else
+            '#$t={0};\n'
+            '#inside $t\n'
+            'id {1}=dum_({2});\n'
+            'id dum_(?a$t1)=1;\n'
+            '$t2=term_;\n'
+            'dropcoefficient;\n'
+            # DropSymbols (since 20121007) may not be available.
+            'id many,PythonFormPRIVATEx?^PythonFormPRIVATEn?=1;\n'
+            'id many,PythonFormPRIVATEf?(?a)=1;\n'
+            'multiply dum_($t1)*dum_($t2);\n'
+            '#endinside'
+        ).format(
+            self._id,
+            '*'.join('{1}^PythonFormPRIVATEn{0}?'.format(i, y)
+                     for i, y in enumerate(x)),
+            ','.join('PythonFormPRIVATEn{0}'.format(i) for i in range(len(x)))
+        ))
+
+        # Each term is form of (exponents)*(coefficient), e.g.,
+        # (1,2,1)*(-4/5*a^-1), separated by '+'.
+        # NOTE: assumed there are no squared symbols like [1+x].
+        a = self._form.read('$t').split('+')
+
+        def _parse(s):
+            i = s.find(')', 1)
+            vec = tuple(int(n) for n in s[1:i].split(','))
+            return vec, s[i + 3:-1] if s[i + 3] == '-' else '+' + s[i + 3:-1]
+
+        # list of (exponents as list of int, coefficient as str)
+        a = [_parse(y) for y in a]
+
+        # Combine coefficients with the same exponents.
+        terms = {}
+        for e, c in a:
+            if e in terms:
+                terms[e] += c
+            else:
+                terms[e] = c
+
+        # Construct the result. The coefficient is appended to the exponents.
+        a = [None] * len(terms)
+        for i, e in enumerate(terms):
+            a[i] = list(e) + [Polynomial(terms[e], False)]
+
+        # The result is sorted.
+        a.sort(key=lambda x: (x[:-1], str(x[-1])))
+
+        return a
 
     def diff(self, x, n=1, check=True):
         """Return the derivative with respect to ``x``.

@@ -19,6 +19,21 @@ class FormPolyTestCase(unittest.TestCase):
     v4.1-20131025-109-gb32e53e [2015-08-05] for large polynomials.
     """
 
+    # Prime numbers larger than 2^64. For testing expressions with big numbers
+    # which cannot fit in a word.
+    _primes = (
+        18446744073709551629,
+        18446744073709551653,
+        18446744073709551667,
+        18446744073709551697,
+        18446744073709551709,
+        18446744073709551757,
+        18446744073709551923,
+        18446744073709551947,
+        18446744073709552009,
+        18446744073709552109,
+    )
+
     def setUp(self):
         """Set up test fixture."""
         form.open(None, 5)
@@ -342,6 +357,57 @@ class FormPolyTestCase(unittest.TestCase):
         self.assertEqual(p.coefficient(x, 2), 1)
 
         self.assertEqual(p.coefficient(x, 2, False), 1)
+
+    def test_exponent_vectors(self):
+        """Test for Polynomial.exponent_vectors()."""
+        p = Polynomial('1+x')
+        q = Polynomial('1-x')
+        x = Polynomial('x')
+        o = object()
+
+        self.assertRaises(ValueError, lambda: p.exponent_vectors('1+x'))
+        self.assertRaises(ValueError, lambda: p.exponent_vectors('x*y'))
+        self.assertRaises(ValueError, lambda: p.exponent_vectors(q))
+        self.assertRaises(TypeError, lambda: p.exponent_vectors(o, 1))
+
+        x1 = Polynomial('x')
+        x2 = Polynomial('x')
+
+        self.assertRaises(ValueError, lambda: p.exponent_vectors('x x'))
+        self.assertRaises(ValueError, lambda: p.exponent_vectors(['x', 'x']))
+        self.assertRaises(ValueError, lambda: p.exponent_vectors([x1, x2]))
+
+        p = Polynomial('(1-a+x+2*x*y-1/3/y)^3')
+        ev = p.exponent_vectors('x y')
+        ref_ev = [
+            [0, -3, Polynomial('-1/27')],
+            [0, -2, Polynomial('1/3-1/3*a')],
+            [0, -1, Polynomial('-1+2*a-a^2')],
+            [0, 0, Polynomial('1-3*a+3*a^2-a^3')],
+            [1, -2, Polynomial('1/3')],
+            [1, -1, Polynomial('-4/3+2*a')],
+            [1, 0, Polynomial('-1-2*a+3*a^2')],
+            [1, 1, Polynomial('6-12*a+6*a^2')],
+            [2, -1, Polynomial('-1')],
+            [2, 0, Polynomial('-1-3*a')],
+            [2, 1, Polynomial('8-12*a')],
+            [2, 2, Polynomial('12-12*a')],
+            [3, 0, Polynomial('1')],
+            [3, 1, Polynomial('6')],
+            [3, 2, Polynomial('12')],
+            [3, 3, Polynomial('8')]
+        ]
+        self.assertEqual(ev, ref_ev)
+
+        a, b, c = symbols('a b c')
+        d, e, f = [Polynomial(n) for n in self._primes[:3]]
+        x, y, z = symbols('x y z')
+        p = (8 * a + d - x / e + y + y / z / f + 3 * z / 7) ** 3
+        ev = p.exponent_vectors('x y z')
+        q = 0
+        for v in ev:
+            q += Polynomial('x^{0}*y^{1}*z^{2}'.format(*v[:-1])) * v[-1]
+        self.assertEqual(p, q)
 
     def test_diff(self):
         """Test for Polynomial.diff()."""
