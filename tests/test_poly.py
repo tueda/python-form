@@ -244,16 +244,18 @@ class FormPolyTestCase(unittest.TestCase):
 
     def test_interpret_symbols(self):
         """Test for Polynomial._interpret_symbols()."""
-        def assert_raises(error, *args):
+        def assert_raises(error, *args, **kwargs):
             self.assertRaises(
-                error, lambda: Polynomial._interpret_symbols(*args))
+                error, lambda: Polynomial._interpret_symbols(*args, **kwargs))
 
-        def assert_equal(*args):
+        def assert_equal(*args, **kwargs):
             self.assertEqual(
-                Polynomial._interpret_symbols(*args[:-1]), args[-1])
+                Polynomial._interpret_symbols(*args[:-1], **kwargs), args[-1])
 
         p = Polynomial('1+x')
         q = Polynomial('2*x')
+        x1 = Polynomial('x')
+        x2 = Polynomial('x')
         o = object()
 
         assert_raises(ValueError, '')
@@ -270,6 +272,19 @@ class FormPolyTestCase(unittest.TestCase):
 
         assert_equal('x', ['x'])
         assert_equal('x y', ['x', 'y'])
+
+        assert_raises(ValueError, '', nonempty=True)
+        assert_equal('', [], nonempty=False)
+
+        assert_raises(TypeError, set(['x', 'y']), ordered=True)
+        assert_equal(set(['x', 'y']),
+                     [x for x in set(['x', 'y'])], ordered=False)
+
+        assert_equal('x x', ['x', 'x'], multiset=True)
+        assert_raises(ValueError, 'x x', multiset=False)
+        assert_raises(ValueError, ['x', 'x'], multiset=False)
+        assert_raises(ValueError, [x1, 'x'], multiset=False)
+        assert_raises(ValueError, [x1, x2], multiset=False)
 
     def test_factorize(self):
         """Test polynomial factorization."""

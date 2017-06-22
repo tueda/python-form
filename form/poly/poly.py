@@ -639,20 +639,51 @@ class Polynomial(object):
     __rdiv__ = __rtruediv__
 
     @staticmethod
-    def _interpret_symbols(x, check=True):
-        """Try to interpret ``x`` as symbols and return a list of strings."""
+    def _interpret_symbols(x, check=True, nonempty=True, ordered=True,
+                           multiset=True):
+        """Try to interpret ``x`` as symbols and return a list of strings.
+
+        Parameters
+        ----------
+        x : str or Polynomial, or tuple, list, set of them
+            The input to be interpreted as symbols.
+        check : bool, optional
+            Check the validity of the input.
+        nonempty : bool, optional
+            Forbid an empty result.
+        ordered : bool, optional
+            Forbid unordered input (i.e., set).
+        multiset : bool, optional
+            Allow duplicated symbols in the result.
+
+        Returns
+        -------
+        list of str
+            Symbols obtained by the interpretation. They may contain
+            $-variables representing symbols.
+
+        """
         if isinstance(x, string_types):
             a = split_symbols(x, True)
-            if not a:
+            if nonempty and not a:
                 raise ValueError('symbol(s) expected: {0}'.format(x))
+            if check and not multiset and len(a) >= 2:
+                a_set = set(a)
+                if len(a_set) != len(a):
+                    raise ValueError('duplicated symbols: {0}'.format(x))
             return a
+
         if isinstance(x, Polynomial):
             if check and not x.is_symbol:
                 raise ValueError('symbol expected: {0}'.format(
                     repr(x)))
             return ["`{0}'".format(x._id)]
+
         if isinstance(x, (tuple, list, set, frozenset)):
-            if not x:
+            if ordered and x and isinstance(x, (set, frozenset)):
+                raise TypeError('(ordered) symbol(s) expected: {0}'.format(x))
+
+            if nonempty and not x:
                 raise ValueError('symbol(s) expected: {0}'.format(x))
 
             def _check(x):
@@ -668,7 +699,23 @@ class Polynomial(object):
                     return "`{0}'".format(x._id)
                 raise TypeError('symbol expected: {0}'.format(repr(x)))
 
-            return [_check(y) for y in x]
+            a = [_check(y) for y in x]
+
+            # The result was constructed in ``a``, but may contains duplicates.
+            if check and not multiset and len(x) >= 2:
+                if any(isinstance(y, Polynomial) for y in x):
+                    # We need to detect duplications by polynomials with
+                    # different ids.
+                    xx = [str(y) if isinstance(y, Polynomial) else y
+                          for y in x]
+                else:
+                    xx = x
+                xx_set = set(xx)
+                if len(xx_set) != len(xx):
+                    raise ValueError('duplicated symbols: {0}'.format(x))
+
+            return a
+
         raise TypeError('symbol(s) expected: {0}'.format(repr(x)))
 
     def factorize(self):
@@ -745,11 +792,15 @@ class Polynomial(object):
         -3
 
         """
-        x = self._interpret_symbols(x, check)
-
         if w is None:
+            x = self._interpret_symbols(
+                x, check, nonempty=True, ordered=False, multiset=True)
             count_args = ','.join('{0},1'.format(y) for y in x)
         else:
+            # The order of symbols corresponds to that of weights.
+            x = self._interpret_symbols(
+                x, check, nonempty=True, ordered=True, multiset=True)
+
             if isinstance(w, integer_types):
                 w = (w,)
             elif (not isinstance(w, (tuple, list)) or
@@ -861,23 +912,9 @@ class Polynomial(object):
         [[1, 2, Polynomial('a')], [2, 1, Polynomial('b')]]
 
         """
-        xx = self._interpret_symbols(x, check)
-
-        if check and len(xx) >= 2:
-            # Duplications of symbols may lead to freezing. Avoid any of them.
-            xxx = xx
-            if not isinstance(x, string_types):
-                assert isinstance(x, (tuple, list, set, frozenset))
-                # The following lines are needed to detect duplications by
-                # polynomials with different ids.
-                if any(isinstance(y, Polynomial) for y in x):
-                    xxx = [str(y) if isinstance(y, Polynomial) else y
-                           for y in x]
-            x_set = set(xxx)
-            if len(x_set) != len(xxx):
-                raise ValueError('duplicated symbols: {0}'.format(x))
-
-        x = xx
+        # NOTE: duplications of symbols may lead to freezing.
+        x = self._interpret_symbols(
+            x, check, nonempty=True, ordered=True, multiset=False)
 
         self._form.write((
             '#$t={0};\n'
