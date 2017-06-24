@@ -12,6 +12,9 @@
 set -eu
 set -o pipefail
 
+ANSI_RED="\033[31;1m"
+ANSI_RESET="\033[0m"
+
 # Taken from https://github.com/travis-ci/travis-build/blob/master/lib/travis/build/templates/header.sh (74247a7)
 travis_retry() {
   local result=0
@@ -20,15 +23,19 @@ travis_retry() {
     [ $result -ne 0 ] && {
       echo -e "\n${ANSI_RED}The command \"$@\" failed. Retrying, $count of 3.${ANSI_RESET}\n" >&2
     }
-    "$@"
-    result=$?
+    # See https://gist.github.com/letmaik/caa0f6cc4375cbfcc1ff26bd4530c2a3
+    # "$@"
+    # result=$?
+    ! { "$@"; result=$?; }
     [ $result -eq 0 ] && break
     count=$(($count + 1))
     sleep 1
   done
+
   [ $count -gt 3 ] && {
     echo -e "\n${ANSI_RED}The command \"$@\" failed 3 times.${ANSI_RESET}\n" >&2
   }
+
   return $result
 }
 
