@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Added
+
+<!-- latest -> stable -->
+- [`form.poly`](http://python-form.readthedocs.io/en/latest/form_poly.html)
+  module for polynomial arithmetic.
+
 ### Changed
 
 - `FormError` is raised when `FormLink.read()` finds the FORM process stopped by
