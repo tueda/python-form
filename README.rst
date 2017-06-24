@@ -33,13 +33,8 @@ Installation
 
     $ pip install python-form
 
-or directly from GitHub for the latest development version:
-
-::
-
-    $ pip install git+https://github.com/tueda/python-form.git
-
-See also the documentation for `pip install`_.
+You may need to use the ``sudo`` command or ``--user`` option for ``pip``.
+See also the documentation of `pip install`_.
 
 Example
 -------
