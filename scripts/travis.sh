@@ -7,7 +7,7 @@
 #
 # Environment variables:
 #   TEST = test | lint
-#   FORM_VERSION = 4.0 | 4.1 | 4.2-pre
+#   FORM_VERSION = 4.0 | 4.1 | 4.2
 
 set -eu
 set -o pipefail
@@ -50,9 +50,9 @@ travis_test_install() {
       # v4.1-20131025 (2013-10-25)
       form_url=https://github.com/vermaseren/form/releases/download/v4.1-20131025/form-4.1-x86_64-linux.tar.gz
       ;;
-    4.2-pre)
-      # v4.1-20131025-356-g541f847 (2017-06-14)
-      form_url=https://github.com/tueda/form-snapshot/releases/download/v4.1-20131025-356-g541f847/form-4.1-20131025-356-g541f847-x86_64-linux.tar.gz
+    4.2)
+      # v4.2.0 (2017-07-06)
+      form_url=https://github.com/vermaseren/form/releases/download/v4.2.0/form-4.2.0-x86_64-linux.tar.gz
       ;;
     *)
       echo "Error: unsupported FORM_VERSION=$FORM_VERSION" >&2
