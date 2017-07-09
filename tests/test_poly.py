@@ -286,6 +286,22 @@ class FormPolyTestCase(unittest.TestCase):
         assert_raises(ValueError, [x1, 'x'], multiset=False)
         assert_raises(ValueError, [x1, x2], multiset=False)
 
+    def test_interpret_integers(self):
+        """Test for Polynomial._interpret_integers()."""
+        def assert_raises(error, *args, **kwargs):
+            self.assertRaises(
+                error, lambda: Polynomial._interpret_integers(*args, **kwargs))
+
+        def assert_equal(*args, **kwargs):
+            self.assertEqual(
+                Polynomial._interpret_integers(*args[:-1], **kwargs), args[-1])
+
+        assert_equal(17, [17])
+        assert_raises(TypeError, set([3, 5]), ordered=True)
+        assert_raises(ValueError, [], nonempty=True)
+        assert_equal([3, 5, 7], [3, 5, 7])
+        assert_raises(TypeError, object())
+
     def test_factorize(self):
         """Test polynomial factorization."""
         p1 = Polynomial('-3+x*y')
@@ -372,6 +388,9 @@ class FormPolyTestCase(unittest.TestCase):
         self.assertEqual(p.coefficient(x, 2), 1)
 
         self.assertEqual(p.coefficient(x, 2, False), 1)
+
+        self.assertRaises(ValueError, lambda: p.coefficient('x y', [1, 2, 3]))
+        self.assertEqual(p.coefficient(['x', 'y'], [1, 1]), Polynomial('3'))
 
     def test_exponent_vectors(self):
         """Test for Polynomial.exponent_vectors()."""

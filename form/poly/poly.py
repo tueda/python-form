@@ -718,6 +718,41 @@ class Polynomial(object):
 
         raise TypeError('symbol(s) expected: {0}'.format(repr(x)))
 
+    @staticmethod
+    def _interpret_integers(x, nonempty=True, ordered=True):
+        """Try to interpret ``x`` as integers and return a list of integers.
+
+        Parameters
+        ----------
+        x : int or list of int
+            The input to be interpreted as integers.
+        nonempty : bool, optional
+            Forbid an empty result.
+        ordered : bool, optional
+            Forbid unordered input (i.e., set).
+
+        Returns
+        -------
+        list of int
+            Integers obtained by the interpretation.
+
+        """
+        if isinstance(x, integer_types):
+            return [x]
+
+        if isinstance(x, (tuple, list, set, frozenset)):
+            if ordered and x and isinstance(x, (set, frozenset)):
+                raise TypeError('(ordered) integers(s) expected: {0}'.format(
+                    x))
+
+            if nonempty and not x:
+                raise ValueError('integer(s) expected: {0}'.format(x))
+
+            if all(isinstance(y, integer_types) for y in x):
+                return list(x)
+
+        raise TypeError('integers(s) expected: {0}'.format(repr(x)))
+
     def factorize(self):
         """Return a generator iterating factors of the polynomial.
 
@@ -800,13 +835,7 @@ class Polynomial(object):
             # The order of symbols corresponds to that of weights.
             x = self._interpret_symbols(
                 x, check, nonempty=True, ordered=True, multiset=True)
-
-            if isinstance(w, integer_types):
-                w = (w,)
-            elif (not isinstance(w, (tuple, list)) or
-                    any(not isinstance(y, integer_types) for y in w)):
-                raise TypeError('integer weight(s) expected: {0}'.format(
-                    repr(w)))
+            w = self._interpret_integers(w, nonempty=True, ordered=True)
             if len(x) != len(w):
                 raise ValueError((
                     'number of symbols and that of weights mismatch: '
@@ -870,30 +899,38 @@ class Polynomial(object):
         >>> p.coefficient('y', 2)
         Polynomial('3+3*x')
 
-        """
-        if isinstance(x, string_types):
-            if check and not is_symbol(x):
-                raise ValueError('symbol expected: {0}'.format(repr(x)))
-        elif isinstance(x, Polynomial):
-            if check:
-                if not x.is_symbol:
-                    raise ValueError('symbol expected: {0}'.format(repr(x)))
-                x = str(x)
-            else:
-                x = "`{0}'".format(x._id)
-        else:
-            raise TypeError('symbol expected: {0}'.format(repr(x)))
+        This method also accepts a vector of symbols and corresponding
+        integers:
 
-        if not isinstance(n, integer_types):
-            raise TypeError('integer expected: {0}'.format(repr(n)))
+        >>> p = Polynomial('1+x+y+z') ** 4
+        >>> p.coefficient(['x', 'y'], [1, 2])
+        Polynomial('12+12*z')
+
+        """
+        # NOTE: the following FORM code leads to 0 for duplicated symbols
+        #       when n != 0.
+        x = self._interpret_symbols(
+            x, check, nonempty=True, ordered=True, multiset=False)
+
+        n = self._interpret_integers(n, nonempty=True, ordered=True)
+
+        if len(x) != len(n):
+            raise ValueError((
+                'number of symbols and that of degrees mismatch: '
+                '{0}, {1}').format(repr(x), repr(n)))
 
         p = Polynomial(self, False)
         self._form.write((
             '#inside {0}\n'
-            'if(count({1},1)!={2})discard;\n'
-            'multiply 1/{1}^{2};\n'
+            '{1}'
             '#endinside'
-        ).format(p._id, x, n))
+        ).format(
+            p._id,
+            ''.join((
+                'if(count({0},1)!={1})discard;\n'
+                'multiply 1/{0}^{1};\n'
+            ).format(xi, ni) for xi, ni in zip(x, n))
+        ))
         p._clear_cache()
         return p
 
