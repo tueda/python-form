@@ -34,6 +34,18 @@ matrix:
       env: TEST=test FORM_VERSION=4.2
     - python: pypy3
       env: TEST=test FORM_VERSION=4.2
+    - python: 3.6
+      install: skip
+      script: skip
+      after_success: true
+      deploy:
+        provider: pypi
+        user: "$PYPI_USER"
+        password: "$PYPI_PASSWORD"
+        on:
+          tags: true
+          distributions: sdist bdist_wheel
+          condition: $TRAVIS_SECURE_ENV_VARS == true
   allow_failures:
     - python: nightly
   fast_finish: true
