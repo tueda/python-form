@@ -102,6 +102,8 @@ class Polynomial(object):
 
     """
 
+    __slots__ = ('_id', '_str', '_len')
+
     _form = None  # The singleton.
     _have_putinside = False  # PutInside statement
     _have_gcd0 = False  # correct gcd_(0,a)
