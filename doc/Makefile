@@ -1,5 +1,8 @@
 # Minimal makefile for Sphinx documentation
 #
+# Prerequisites:
+#   pip install sphinx
+#
 
 # You can set these variables from the command line.
 SPHINXOPTS    =

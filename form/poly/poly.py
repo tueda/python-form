@@ -315,12 +315,12 @@ class Polynomial(object):
 
     @property
     def integer(self):
-        """Convert the polynomial into an integer."""
+        """Give the integer value if the polynomial is an integer."""
         return int(str(self))
 
     @property
     def fraction(self):
-        """Convert the polynomial into a fraction."""
+        """Give the fraction if the polynomial is a rational number."""
         try:
             return Fraction(self.integer)
         except ValueError:

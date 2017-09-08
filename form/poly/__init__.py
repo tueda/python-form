@@ -7,6 +7,12 @@ that the most powerful features of FORM, i.e., possibly parallelized SIMD
 operations on terms in large expressions on disks are not accessible in this
 way.
 
+Note
+----
+
+FORM 4.2 or later is strongly recommended to avoid bugs in earlier versions of
+FORM.
+
 Examples
 --------
 >>> from form.poly import Polynomial
