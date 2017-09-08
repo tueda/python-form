@@ -39,7 +39,7 @@ class TokenList(object):
 
     @property
     def next(self):
-        """Return the next token type."""
+        """Get the next token type."""
         if len(self) <= 0:
             return _NONE
         return self._tokens[self.pos]

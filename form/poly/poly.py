@@ -299,7 +299,7 @@ class Polynomial(object):
 
     @property
     def unit(self):
-        """Return the unit of the polynomial (the sign of the first term)."""
+        """Get the unit of the polynomial (the sign of the first term)."""
         self._form.write((
             '#if termsin({0})\n'
             '#$t1=firstterm_({0});\n'
@@ -315,12 +315,12 @@ class Polynomial(object):
 
     @property
     def integer(self):
-        """Give the integer value if the polynomial is an integer."""
+        """Get the integer value if the polynomial is an integer."""
         return int(str(self))
 
     @property
     def fraction(self):
-        """Give the fraction if the polynomial is a rational number."""
+        """Get the fraction if the polynomial is a rational number."""
         try:
             return Fraction(self.integer)
         except ValueError:

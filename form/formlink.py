@@ -466,12 +466,12 @@ class FormLink(object):
 
     @property
     def head(self):
-        """Return the first line of the FORM output."""
+        """Get the first line of the FORM output."""
         return self._head
 
     @property
     def _dateversion(self):
-        """Return the build/revision date as an integer "yyyymmdd"."""
+        """Get the build/revision date as an integer "yyyymmdd"."""
         import re
         if self._head:
             m = re.search(r'(?<=\()(.*)(?=\))', self._head)
