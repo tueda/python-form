@@ -10,8 +10,8 @@ way.
 Note
 ----
 
-FORM 4.2 or later is strongly recommended to avoid bugs in earlier versions of
-FORM.
+FORM 4.2 or later is strongly recommended to avoid $-variable bugs in earlier
+versions of FORM.
 
 Examples
 --------
