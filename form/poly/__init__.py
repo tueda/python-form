@@ -10,8 +10,10 @@ way.
 Note
 ----
 
-FORM 4.2 or later is strongly recommended to avoid $-variable bugs in earlier
-versions of FORM.
+FORM 4.2 or later is strongly recommended to avoid several bugs for
+$-variables, polynomial arithmetic etc. in earlier versions of FORM.
+Still FORM 4.2 is known to have a bug for big $-variables (see also
+`vermaseren/form#215 <https://github.com/vermaseren/form/issues/215>`_).
 
 Examples
 --------
