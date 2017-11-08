@@ -21,6 +21,10 @@ python-form
     :target: https://python-form.readthedocs.io/en/latest
     :alt: Documentation Status
 
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.1044010.svg
+    :target: https://doi.org/10.5281/zenodo.1044010
+    :alt: DOI
+
 This package provides a mechanism to embed FORM_ [1]_ [2]_ [3]_ programs in
 Python code. The basic idea of the implementation is the same as FormLink_ [4]_:
 it utilizes unnamed pipes between FORM and an external program [5]_, Python in
