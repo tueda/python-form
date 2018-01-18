@@ -14,10 +14,14 @@ Example
 4*p1.p2*p3.p4-4*p1.p3*p2.p4+4*p1.p4*p2.p3
 """
 
+if False:
+    from typing import Optional, Sequence, Union  # noqa: F401
+
 from .formlink import FormError, FormLink  # noqa: F401
 
 
 def open(args=None, keep_log=False):
+    # type: (Optional[Union[str, Sequence[str]]], bool) -> FormLink
     """Open a connection to FORM and return a link object.
 
     Open a connection to a new FORM process and return a
