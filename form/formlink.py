@@ -12,6 +12,12 @@ from .datapath import get_data_path
 from .io import PushbackReader, set_nonblock
 from .six import PY32, string_types
 
+if False:
+    from typing import Any, IO, MutableSequence, Optional, Sequence, Tuple, Union, overload  # noqa: E501, F401
+if True:
+    def overload(f):  # type: ignore  # noqa: D103, F811
+        return None
+
 
 class FormLink(object):
     """Connection to a FORM process."""
@@ -25,18 +31,20 @@ class FormLink(object):
     _PROMPT = '\n__READY__\n'
 
     def __init__(self, args=None, keep_log=False):
+        # type: (Optional[Union[str, Sequence[str]]], Union[bool, int]) -> None
         """Open a connection to a FORM process."""
         self._closed = True
-        self._head = None
-        self._log = None
-        self._childpid = None
-        self._formpid = None
-        self._parentin = None
-        self._parentout = None
-        self._loggingin = None
+        self._head = None       # type: Optional[str]
+        self._log = None        # type: Optional[MutableSequence[str]]
+        self._childpid = None   # type: Optional[int]
+        self._formpid = None    # type: Optional[int]
+        self._parentin = None   # type: Optional[PushbackReader]
+        self._parentout = None  # type: Optional[IO[str]]
+        self._loggingin = None  # type: Optional[PushbackReader]
         self.open(args, keep_log)
 
     def __del__(self):
+        # type: () -> None
         """Destructor.
 
         Free the connection to the FORM process if it still exists. Since in
@@ -51,14 +59,17 @@ class FormLink(object):
             pass
 
     def __enter__(self):
+        # type: () -> FormLink
         """Enter the runtime context."""
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
+        # type: (Any, Any, Any) -> None
         """Exit the runtime context."""
         self.close()
 
     def open(self, args=None, keep_log=False):
+        # type: (Optional[Union[str, Sequence[str]]], Union[bool, int]) -> None
         """Open a connection to FORM.
 
         Open a connection to a new FORM process. The opened connection should
@@ -94,11 +105,12 @@ class FormLink(object):
                 args = os.environ['FORM']
             else:
                 args = 'form'
-
         if isinstance(args, string_types):
             args = shlex.split(args)  # Split the arguments.
         elif isinstance(args, (list, tuple)):
             args = list(args)  # As a modifiable mutable object.
+        else:
+            raise TypeError("invalid args = {0}".format(args))
 
         self.close()
 
@@ -146,8 +158,6 @@ class FormLink(object):
 
             set_nonblock(fd_parentin)
             set_nonblock(fd_loggingin)
-            parentin = PushbackReader(parentin)
-            loggingin = PushbackReader(loggingin)
 
             self._closed = False
             self._head = head
@@ -164,9 +174,9 @@ class FormLink(object):
                 parentout.write('#-\n')
             self._childpid = pid
             self._formpid = formpid
-            self._parentin = parentin
+            self._parentin = PushbackReader(parentin)
             self._parentout = parentout
-            self._loggingin = loggingin
+            self._loggingin = PushbackReader(loggingin)
         else:
             # child process
 
@@ -202,6 +212,7 @@ class FormLink(object):
             os._exit(0)
 
     def close(self):
+        # type: () -> None
         """Close the connection to FORM.
 
         Close the connection to the FORM process established by :meth:`open`.
@@ -212,7 +223,13 @@ class FormLink(object):
         self._close()
 
     def _close(self, term=False, kill=False):
+        # type: (float, float) -> None
         if not self._closed:
+            assert self._childpid is not None
+            assert self._formpid is not None
+            assert self._parentin is not None
+            assert self._parentout is not None
+            assert self._loggingin is not None
             try:
                 # We ignore broken pipes.
                 try:
@@ -236,7 +253,9 @@ class FormLink(object):
                     # finish shortly.
 
                     def wait(timeout):  # timeout <= 0 means no wait
+                        # type: (float) -> bool
                         # Wait for the child to finish.
+                        assert self._childpid is not None
                         t = 0.0
                         dt = 0.01
                         if timeout > 0:
@@ -281,11 +300,13 @@ class FormLink(object):
                 self._loggingin = None
 
     def kill(self):
+        # type: () -> None
         """Kill the FORM process and close the connection."""
         self._close(kill=-1)  # Kill it immediately.
 #       self._close(term=-1, kill=1)
 
     def write(self, script):
+        # type: (str) -> None
         """Send a script to FORM.
 
         Write the given script to the communication channel to FORM. It could
@@ -296,10 +317,12 @@ class FormLink(object):
             raise IOError('tried to write to closed connection')
         script = script.strip()
         if script:
+            assert self._parentout is not None
             self._parentout.write(script)
             self._parentout.write('\n')
 
     def flush(self):
+        # type: () -> None
         """Flush the channel to FORM.
 
         Flush the communication channel to FORM. Because :meth:`write` is
@@ -308,9 +331,71 @@ class FormLink(object):
         """
         if self._closed:
             raise IOError('tried to flush closed connection')
+        assert self._parentout is not None
         self._parentout.flush()
 
-    def read(self, *names):
+    @overload
+    def read(self, name):  # noqa: D102
+        # type: (str) -> str
+        pass
+
+    @overload  # noqa: F811
+    def read(self, name1, name2):  # noqa: D102
+        # type: (str, str) -> Tuple[str, str]
+        pass
+
+    @overload  # noqa: F811
+    def read(self, name1, name2, name3):  # noqa: D102
+        # type: (str, str, str) -> Tuple[str, str, str]
+        pass
+
+    @overload  # noqa: F811
+    def read(self, name1, name2, name3, name4):  # noqa: D102
+        # type: (str, str, str, str) -> Tuple[str, str, str, str]
+        pass
+
+    @overload  # noqa: F811
+    def read(self, name1, name2, name3, name4, name5):  # noqa: D102
+        # type: (str, str, str, str, str) -> Tuple[str, str, str, str, str]
+        pass
+
+    @overload  # noqa: F811
+    def read(self, name1, name2, name3, name4, name5, name6):  # noqa: D102
+        # type: (str, str, str, str, str, str) -> Tuple[str, str, str, str, str, str]  # noqa: E501
+        pass
+
+    @overload  # noqa: F811
+    def read(self, name1, name2, name3, name4, name5, name6, name7):  # noqa: D102, E501
+        # type: (str, str, str, str, str, str, str) -> Tuple[str, str, str, str, str, str, str]  # noqa: E501
+        pass
+
+    @overload  # noqa: F811
+    def read(self, name1, name2, name3, name4, name5, name6, name7, name8):  # noqa: D102, E501
+        # type: (str, str, str, str, str, str, str, str) -> Tuple[str, str, str, str, str, str, str, str]  # noqa: E501
+        pass
+
+    @overload  # noqa: F811
+    def read(self, name1, name2, name3, name4, name5, name6, name7, name8, name9):  # noqa: D102, E501
+        # type: (str, str, str, str, str, str, str, str, str) -> Tuple[str, str, str, str, str, str, str, str, str]  # noqa: E501
+        pass
+
+    @overload  # noqa: F811
+    def read(self, names):  # noqa: D102
+        # type: (Sequence[str]) -> Sequence[str]
+        pass
+
+    @overload  # noqa: F811
+    def read(self, *names):  # noqa: D102
+        # type: (str) -> Sequence[str]
+        pass
+
+    @overload  # noqa: F811
+    def read(self, *names):  # noqa: D102
+        # type: (Any) -> Any
+        pass
+
+    def read(self, *names):  # type: ignore  # noqa: F811
+        # type: (Any) -> Any
         r"""Read results from FORM.
 
         Wait for a response of FORM to obtain the results specified by
@@ -372,6 +457,10 @@ class FormLink(object):
 
         if any(not isinstance(x, string_types) for x in names):
             return [self.read(x) for x in names]
+
+        assert self._parentin is not None
+        assert self._parentout is not None
+        assert self._loggingin is not None
 
         for e in names:
             if len(e) >= 2 and e[0] == '`' and e[-1] == "'":
@@ -461,22 +550,26 @@ class FormLink(object):
 
     @property
     def closed(self):
+        # type: () -> bool
         """Return True if the connection is closed."""
         return self._closed
 
     @property
     def head(self):
+        # type: () -> str
         """Return the first line of the FORM output."""
+        assert self._head is not None
         return self._head
 
     @property
     def _dateversion(self):
+        # type: () -> int
         """Return the build/revision date as an integer "yyyymmdd"."""
         import re
         if self._head:
-            m = re.search(r'(?<=\()(.*)(?=\))', self._head)
-            if m:
-                s = re.split(r'[, ]+', m.group(0))
+            ma = re.search(r'(?<=\()(.*)(?=\))', self._head)
+            if ma:
+                s = re.split(r'[, ]+', ma.group(0))
                 if len(s) >= 3:
                     # month
                     month_names = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
