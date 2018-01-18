@@ -13,7 +13,10 @@ from .io import PushbackReader, set_nonblock
 from .six import PY32, string_types
 
 if False:
-    from typing import Any, IO, MutableSequence, Optional, Sequence, Union  # noqa: F401, E501
+    from typing import Any, IO, MutableSequence, Optional, Sequence, Tuple, Union, overload  # noqa: F401, E501
+if True:
+    def overload(f):  # type: ignore  # noqa: D103, F811
+        return None
 
 
 class FormLink(object):
@@ -333,7 +336,47 @@ class FormLink(object):
         assert self._parentout is not None
         self._parentout.flush()
 
-    def read(self, *names):
+    @overload
+    def read(self, name):  # noqa: D102
+        # type: (str) -> str
+        pass
+
+    @overload  # noqa: F811
+    def read(self, name1, name2):  # noqa: D102
+        # type: (str, str) -> Tuple[str, str]
+        pass
+
+    @overload  # noqa: F811
+    def read(self, name1, name2, name3):  # noqa: D102
+        # type: (str, str, str) -> Tuple[str, str, str]
+        pass
+
+    @overload  # noqa: F811
+    def read(self, name1, name2, name3, name4):  # noqa: D102
+        # type: (str, str, str, str) -> Tuple[str, str, str, str]
+        pass
+
+    @overload  # noqa: F811
+    def read(self, name1, name2, name3, name4, name5):  # noqa: D102
+        # type: (str, str, str, str, str) -> Tuple[str, str, str, str, str]
+        pass
+
+    @overload  # noqa: F811
+    def read(self, names):  # noqa: D102
+        # type: (Sequence[str]) -> Sequence[str]
+        pass
+
+    @overload  # noqa: F811
+    def read(self, *names):  # noqa: D102
+        # type: (str) -> Sequence[str]
+        pass
+
+    @overload  # noqa: F811
+    def read(self, *names):  # noqa: D102
+        # type: (Any) -> Any
+        pass
+
+    def read(self, *names):  # type: ignore  # noqa: F811
         # type: (Any) -> Any
         r"""Read results from FORM.
 
