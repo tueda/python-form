@@ -6,7 +6,7 @@
 #   travis.sh after_success
 #
 # Environment variables:
-#   TEST = test | lint
+#   TEST = test | lint | mypy
 #   FORM_VERSION = 4.0 | 4.1 | 4.2
 
 set -eu
@@ -110,8 +110,20 @@ travis_lint_after_success() {
   :
 }
 
+travis_mypy_install() {
+  travis_retry pip install mypy
+}
+
+travis_mypy_script() {
+  mypy form
+}
+
+travis_lint_after_success() {
+  :
+}
+
 case "$TEST" in
-  test|lint)
+  test|lint|mypy)
     ;;
   *)
     echo "Error: unknown TEST=$TEST" >&2

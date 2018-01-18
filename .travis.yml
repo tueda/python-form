@@ -6,6 +6,8 @@ matrix:
       env: TEST=lint
     - python: 3.6
       env: TEST=lint
+    - python: 3.6
+      env: TEST=mypy
     - python: 2.6
       env: TEST=test FORM_VERSION=4.2
     - python: 2.7
