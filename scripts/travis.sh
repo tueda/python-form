@@ -84,7 +84,9 @@ travis_test_install() {
 
 travis_test_script() {
   export PATH=$PATH:$(pwd)/formbin
+  set -x
   nosetests --with-coverage --rednose --hide-skips --with-timer --timer-top-n 10
+  set +x
 }
 
 travis_test_after_success() {
@@ -97,13 +99,25 @@ travis_lint_install() {
       travis_retry pip install flake8 flake8_docstrings pep8-naming flake8-import-order
       ;;
     *)
-      travis_retry pip install flake8 flake8_docstrings pep8-naming flake8-import-order flake8-bugbear
+      travis_retry pip install flake8 flake8_docstrings pep8-naming flake8-import-order flake8-bugbear flake8-mypy
       ;;
   esac
 }
 
 travis_lint_script() {
+  set -x
   flake8
+  set +x
+  case "$TRAVIS_PYTHON_VERSION" in
+    2.*|3.0|3.1|3.2|3.3|3.4|pypy)
+      ;;
+    *)
+      set -x
+      mypy form
+      mypy -2 form
+      set +x
+      ;;
+  esac
 }
 
 travis_lint_after_success() {
