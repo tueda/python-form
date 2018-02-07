@@ -12,8 +12,21 @@ import sys
 #
 sys.path.insert(0, os.path.abspath('..'))
 
+
 # Import the package metadata from ../setup.py.
-from setup import _metadata  # noqa: E402
+def _import_metadata():
+    with open('../setup.py') as f:
+        for line in f.readlines():
+            keys = ('name', 'author', 'version')
+            for key in keys:
+                i = line.find(key + '=')
+                if i >= 0:
+                    _metadata[key] = (line[i + len(key) + 1:].rstrip().
+                                      rstrip(',').strip("'"))
+
+
+_metadata = {}
+_import_metadata()
 
 
 # -- General configuration ------------------------------------------------
