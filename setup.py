@@ -13,7 +13,7 @@ def setup_package():
     """Entry point."""
     setup(
         name='python-form',
-        version='0.2.1',
+        version='0.2.2',
         description='A package for communicating with FORM',
         long_description=readme(),
         author='Takahiro Ueda',

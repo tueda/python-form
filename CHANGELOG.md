@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## [0.2.2](https://github.com/tueda/python-form/releases/tag/v0.2.2) (2018-02-07)
 
 ### Changed
 
@@ -8,7 +8,11 @@
   some error (previously `RuntimeError`).
   ([1e1ae33](https://github.com/tueda/python-form/commit/1e1ae33))
 
-[Full changes...](https://github.com/tueda/python-form/compare/v0.2.1...HEAD)
+### Added
+
+- Added type hints in the comment-based syntax.
+
+[Full changes...](https://github.com/tueda/python-form/compare/v0.2.1...v0.2.2)
 
 ## [0.2.1](https://github.com/tueda/python-form/releases/tag/v0.2.1) (2017-05-31)
 
