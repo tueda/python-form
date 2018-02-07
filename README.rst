@@ -21,8 +21,8 @@ python-form
     :target: https://python-form.readthedocs.io/en/latest
     :alt: Documentation Status
 
-.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.1044010.svg
-    :target: https://doi.org/10.5281/zenodo.1044010
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.1044009.svg
+    :target: https://doi.org/10.5281/zenodo.1044009
     :alt: DOI
 
 This package provides a mechanism to embed FORM_ [1]_ [2]_ [3]_ programs in
