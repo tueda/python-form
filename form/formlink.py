@@ -10,7 +10,7 @@ import sys
 
 from .datapath import get_data_path
 from .ioutil import PushbackReader, set_nonblock
-from .six import PY32, string_types
+from .six import string_types
 
 if False:
     from typing import Any, IO, MutableSequence, Optional, Sequence, Tuple, Union, overload  # noqa: E501, F401
@@ -163,7 +163,9 @@ class FormLink(object):
             self._head = head
             if keep_log:
                 if keep_log >= 2:
-                    self._log = collections.deque(maxlen=keep_log)
+                    log = collections.deque(maxlen=keep_log)  # type: Any
+                    self._log = log  # hack typeshed for Python 2
+                    assert self._log is not None
                     self._log.append(head)
                 else:
                     self._log = []
@@ -198,7 +200,7 @@ class FormLink(object):
             # value for close_fds from False to True, in order to stop leaking
             # file descriptors. File descriptors to be kept open should be
             # specified by pass_fds.
-            if not PY32:
+            if sys.version_info[0:2] < (3, 2):
                 subprocess.call(args, shell=False)
             else:
                 subprocess.call(args, shell=False,

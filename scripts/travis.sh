@@ -84,9 +84,7 @@ travis_test_install() {
 
 travis_test_script() {
   export PATH=$PATH:$(pwd)/formbin
-  set -x
   nosetests --with-coverage --rednose --hide-skips --with-timer --timer-top-n 10
-  set +x
 }
 
 travis_test_after_success() {
@@ -105,17 +103,13 @@ travis_lint_install() {
 }
 
 travis_lint_script() {
-  set -x
   flake8
-  set +x
   case "$TRAVIS_PYTHON_VERSION" in
     2.*|3.0|3.1|3.2|3.3|3.4|pypy)
       ;;
     *)
-      set -x
       mypy form
       mypy -2 form
-      set +x
       ;;
   esac
 }
