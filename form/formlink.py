@@ -9,7 +9,7 @@ import subprocess
 import sys
 
 from .datapath import get_data_path
-from .io import PushbackReader, set_nonblock
+from .ioutil import PushbackReader, set_nonblock
 from .six import PY32, string_types
 
 if False:
