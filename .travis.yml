@@ -42,9 +42,9 @@ matrix:
         provider: pypi
         user: "$PYPI_USER"
         password: "$PYPI_PASSWORD"
+        distributions: sdist bdist_wheel
         on:
           tags: true
-          distributions: sdist bdist_wheel
           condition: $TRAVIS_SECURE_ENV_VARS == true
   allow_failures:
     - python: nightly
