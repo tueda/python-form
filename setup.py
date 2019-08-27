@@ -4,12 +4,14 @@ from setuptools import find_packages, setup
 
 
 def readme():
+    # type: () -> str
     """Read the README file."""
     with open('README.rst') as f:
         return f.read()
 
 
 def setup_package():
+    # type: () -> None
     """Entry point."""
     setup(
         name='python-form',

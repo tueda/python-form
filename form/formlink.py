@@ -340,65 +340,94 @@ class FormLink(object):
     @overload
     def read(self, name):  # noqa: D102
         # type: (str) -> str
-        pass
+        pass  # pragma: no cover
 
     @overload  # noqa: F811
     def read(self, name1, name2):  # noqa: D102
         # type: (str, str) -> Tuple[str, str]
-        pass
+        pass  # pragma: no cover
 
     @overload  # noqa: F811
     def read(self, name1, name2, name3):  # noqa: D102
         # type: (str, str, str) -> Tuple[str, str, str]
-        pass
+        pass  # pragma: no cover
 
     @overload  # noqa: F811
     def read(self, name1, name2, name3, name4):  # noqa: D102
         # type: (str, str, str, str) -> Tuple[str, str, str, str]
-        pass
+        pass  # pragma: no cover
 
     @overload  # noqa: F811
     def read(self, name1, name2, name3, name4, name5):  # noqa: D102
         # type: (str, str, str, str, str) -> Tuple[str, str, str, str, str]
-        pass
+        pass  # pragma: no cover
 
     @overload  # noqa: F811
     def read(self, name1, name2, name3, name4, name5, name6):  # noqa: D102
         # type: (str, str, str, str, str, str) -> Tuple[str, str, str, str, str, str]  # noqa: E501
-        pass
+        pass  # pragma: no cover
 
     @overload  # noqa: F811
     def read(self, name1, name2, name3, name4, name5, name6, name7):  # noqa: D102, E501
         # type: (str, str, str, str, str, str, str) -> Tuple[str, str, str, str, str, str, str]  # noqa: E501
-        pass
+        pass  # pragma: no cover
 
     @overload  # noqa: F811
     def read(self, name1, name2, name3, name4, name5, name6, name7, name8):  # noqa: D102, E501
         # type: (str, str, str, str, str, str, str, str) -> Tuple[str, str, str, str, str, str, str, str]  # noqa: E501
-        pass
+        pass  # pragma: no cover
 
     @overload  # noqa: F811
     def read(self, name1, name2, name3, name4, name5, name6, name7, name8, name9):  # noqa: D102, E501
         # type: (str, str, str, str, str, str, str, str, str) -> Tuple[str, str, str, str, str, str, str, str, str]  # noqa: E501
-        pass
+        pass  # pragma: no cover
 
     @overload  # noqa: F811
     def read(self, names):  # noqa: D102
-        # type: (Sequence[str]) -> Sequence[str]
-        pass
+        # type: (Tuple[str]) -> str
+        pass  # pragma: no cover
+
+    @overload  # noqa: F811
+    def read(self, names):  # noqa: D102
+        # type: (Tuple[str, str]) -> Tuple[str, str]
+        pass  # pragma: no cover
+
+    @overload  # noqa: F811
+    def read(self, names):  # noqa: D102
+        # type: (Tuple[str, str, str]) -> Tuple[str, str, str]
+        pass  # pragma: no cover
+
+    @overload  # noqa: F811
+    def read(self, names):  # noqa: D102
+        # type: (Tuple[str, str, str, str]) -> Tuple[str, str, str, str]
+        pass  # pragma: no cover
+
+    @overload  # noqa: F811
+    def read(self, names):  # noqa: D102
+        # type: (Tuple[str, str, str, str, str]) -> Tuple[str, str, str, str, str]  # noqa: E501
+        pass  # pragma: no cover
+
+    @overload  # noqa: F811
+    def read(self, names):  # noqa: D102
+        # type: (Tuple[str, str, str, str, str, str]) -> Tuple[str, str, str, str, str, str]  # noqa: E501
+        pass  # pragma: no cover
+
+    @overload  # noqa: F811
+    def read(self, names):  # noqa: D102
+        # type: (Tuple[str, str, str, str, str, str, str]) -> Tuple[str, str, str, str, str, str, str]  # noqa: E501
+        pass  # pragma: no cover
 
     @overload  # noqa: F811
     def read(self, *names):  # noqa: D102
         # type: (str) -> Sequence[str]
-        pass
+        pass  # pragma: no cover
 
     @overload  # noqa: F811
-    def read(self, *names):  # noqa: D102
-        # type: (Any) -> Any
-        pass
+    def read(self, names):  # noqa: D102
+        # type: (Sequence[str]) -> Sequence[str]
+        pass  # pragma: no cover
 
     def read(self, *names):  # type: ignore  # noqa: F811
-        # type: (Any) -> Any
         r"""Read results from FORM.
 
         Wait for a response of FORM to obtain the results specified by
@@ -447,6 +476,12 @@ class FormLink(object):
         ['a1', ['a2', 'a3']]
 
         >>> f.close()
+
+        Note
+        ----
+        Currently nested inputs are not supported for static typing. You need
+        ``# type: ignore`` or other hacks.
+
         """
         if self._closed:
             raise IOError('tried to read from closed connection')
