@@ -40,7 +40,7 @@ def setup_package():
         ],
         keywords='binding, form, computer algebra',
         packages=find_packages(),
-        package_data={'form': ['init.frm']},
+        package_data={'form': ['init.frm', 'py.typed']},
         setup_requires=['nose'],
     )
 
