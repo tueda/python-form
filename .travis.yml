@@ -2,39 +2,52 @@ language: python
 
 matrix:
   include:
+    # linters
     - python: 2.7
       env: TEST=lint
-    - python: 3.6
+    - python: 3.7
       env: TEST=lint
+    # support for major Python versions
+    - python: 2.7
+      env: TEST=test FORM_VERSION=4.0
+    - python: 2.7
+      env: TEST=test FORM_VERSION=4.1
+    - python: 2.7
+      env: TEST=test FORM_VERSION=4.2
+    - python: 2.7
+      env: TEST=test FORM_VERSION=4.2.1
+    - python: 3.7
+      env: TEST=test FORM_VERSION=4.0
+    - python: 3.7
+      env: TEST=test FORM_VERSION=4.1
+    - python: 3.7
+      env: TEST=test FORM_VERSION=4.2
+    - python: 3.7
+      env: TEST=test FORM_VERSION=4.2.1
+    # support for minor Python versions
     - python: 2.6
-      env: TEST=test FORM_VERSION=4.2
-    - python: 2.7
-      env: TEST=test FORM_VERSION=4.0
-    - python: 2.7
-      env: TEST=test FORM_VERSION=4.1
-    - python: 2.7
-      env: TEST=test FORM_VERSION=4.2
+      dist: trusty
+      env: TEST=test FORM_VERSION=4.2.1
     - python: 3.2
-      env: TEST=test FORM_VERSION=4.2
+      dist: trusty
+      env: TEST=test FORM_VERSION=4.2.1
     - python: 3.3
-      env: TEST=test FORM_VERSION=4.2
+      dist: trusty
+      env: TEST=test FORM_VERSION=4.2.1
     - python: 3.4
-      env: TEST=test FORM_VERSION=4.2
+      env: TEST=test FORM_VERSION=4.2.1
     - python: 3.5
-      env: TEST=test FORM_VERSION=4.2
+      env: TEST=test FORM_VERSION=4.2.1
     - python: 3.6
-      env: TEST=test FORM_VERSION=4.0
-    - python: 3.6
-      env: TEST=test FORM_VERSION=4.1
-    - python: 3.6
-      env: TEST=test FORM_VERSION=4.2
+      env: TEST=test FORM_VERSION=4.2.1
     - python: nightly
-      env: TEST=test FORM_VERSION=4.2
+      env: TEST=test FORM_VERSION=4.2.1
     - python: pypy
-      env: TEST=test FORM_VERSION=4.2
+      env: TEST=test FORM_VERSION=4.2.1
     - python: pypy3
-      env: TEST=test FORM_VERSION=4.2
-    - python: 3.6
+      env: TEST=test FORM_VERSION=4.2.1
+    # release
+    - python: 3.7
       install: skip
       script: skip
       after_success: true

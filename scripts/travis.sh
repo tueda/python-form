@@ -7,7 +7,7 @@
 #
 # Environment variables:
 #   TEST = test | lint
-#   FORM_VERSION = 4.0 | 4.1 | 4.2
+#   FORM_VERSION = 4.0 | 4.1 | 4.2 | 4.2.1
 
 set -eu
 set -o pipefail
@@ -54,6 +54,10 @@ travis_test_install() {
       # v4.2.0 (2017-07-06)
       form_url=https://github.com/vermaseren/form/releases/download/v4.2.0/form-4.2.0-x86_64-linux.tar.gz
       ;;
+    4.2.1)
+      # v4.2.1 (2019-02-01)
+      form_url=https://github.com/vermaseren/form/releases/download/v4.2.1/form-4.2.1-x86_64-linux.tar.gz
+      ;;
     *)
       echo "Error: unsupported FORM_VERSION=$FORM_VERSION" >&2
       exit 1
@@ -70,7 +74,7 @@ travis_test_install() {
   # For testing/code coverage.
   case "$TRAVIS_PYTHON_VERSION" in
     2.6)
-      travis_retry pip install coverage nose-timer==0.7.0
+      travis_retry pip install colorama==0.3.9 coverage nose-timer==0.7.0
       ;;
     3.2)
       travis_retry pip install coverage==3.7.1 nose-timer
