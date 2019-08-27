@@ -12,6 +12,7 @@ Example
 ...     ''')
 ...     print(f.read('F'))
 4*p1.p2*p3.p4-4*p1.p3*p2.p4+4*p1.p4*p2.p3
+
 """
 
 if False:
@@ -48,5 +49,6 @@ def open(args=None, keep_log=False):
     ----
     In the current implementation, ``keep_log=True`` may cause a dead lock when
     the listing of the input is enabled and very long input is sent to FORM.
+
     """
     return FormLink(args, keep_log)
