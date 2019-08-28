@@ -1,5 +1,15 @@
 # Change Log
 
+## [0.2.3](https://github.com/tueda/python-form/releases/tag/v0.2.3) (2019-08-28)
+
+### Fixed
+
+- Added missing `py.typed` for optional static typing.
+  See also [PEP 561](https://www.python.org/dev/peps/pep-0561/).
+  ([85bdd04](https://github.com/tueda/python-form/commit/85bdd04))
+
+[Full changes...](https://github.com/tueda/python-form/compare/v0.2.2...v0.2.3)
+
 ## [0.2.2](https://github.com/tueda/python-form/releases/tag/v0.2.2) (2018-02-07)
 
 ### Changed
