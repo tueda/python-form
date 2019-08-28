@@ -477,6 +477,8 @@ class FormLink(object):
 
         >>> f.close()
 
+        TEST! TEST! TEST!
+
         Note
         ----
         Currently nested inputs are not supported for static typing. You need
