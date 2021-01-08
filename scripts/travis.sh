@@ -72,18 +72,18 @@ travis_test_install() {
   pip install .
 
   # For testing/code coverage.
-  case "$TRAVIS_PYTHON_VERSION" in
-    2.6)
-      travis_retry pip install colorama==0.3.9 coverage nose-timer==0.7.0
-      ;;
-    3.2)
-      travis_retry pip install coverage==3.7.1 nose-timer
-      ;;
-    *)
-      travis_retry pip install coverage nose-timer
-      ;;
-  esac
-  travis_retry pip install coveralls rednose
+  #case "$TRAVIS_PYTHON_VERSION" in
+  #  2.6)
+  #    travis_retry pip install colorama==0.3.9 coverage nose-timer==0.7.0
+  #    ;;
+  #  3.2)
+  #    travis_retry pip install coverage==3.7.1 nose-timer
+  #    ;;
+  #  *)
+  #    travis_retry pip install coverage nose-timer
+  #    ;;
+  #esac
+  travis_retry pip install coveralls rednose nose-timer
 }
 
 travis_test_script() {
