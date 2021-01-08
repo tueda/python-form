@@ -2,10 +2,10 @@ python-form
 ===========
 
 .. toctree::
-   :maxdepth: 4
-   :caption: Contents:
+    :maxdepth: 4
+    :caption: Contents:
 
-   modules
+    modules
 
 
 Indices and tables

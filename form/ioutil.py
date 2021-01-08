@@ -10,9 +10,7 @@ if False:
 def set_nonblock(fd):
     # type: (int) -> None
     """Set the given file descriptor to non-blocking mode."""
-    fcntl.fcntl(fd,
-                fcntl.F_SETFL,
-                fcntl.fcntl(fd, fcntl.F_GETFL) | os.O_NONBLOCK)
+    fcntl.fcntl(fd, fcntl.F_SETFL, fcntl.fcntl(fd, fcntl.F_GETFL) | os.O_NONBLOCK)
 
 
 class PushbackReader(object):
@@ -22,7 +20,7 @@ class PushbackReader(object):
         # type: (IO[str]) -> None
         """Initialize the reader."""
         self._raw = raw
-        self._buf = ''
+        self._buf = ""
 
     def close(self):
         # type: () -> None
@@ -38,7 +36,7 @@ class PushbackReader(object):
         # type: () -> str
         """Read data from the stream."""
         s = self._buf + self._raw.read()
-        self._buf = ''
+        self._buf = ""
         return s
 
     def unread(self, s):
@@ -58,5 +56,5 @@ class PushbackReader(object):
         the underlying raw stream's ``read()`` occurs.
         """
         s = self._buf
-        self._buf = ''
+        self._buf = ""
         return s

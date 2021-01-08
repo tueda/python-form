@@ -13,8 +13,18 @@ from .ioutil import PushbackReader, set_nonblock
 from .six import string_types
 
 if False:
-    from typing import Any, IO, MutableSequence, Optional, Sequence, Tuple, Union, overload  # noqa: E501, F401
+    from typing import (
+        Any,
+        IO,
+        MutableSequence,
+        Optional,
+        Sequence,
+        Tuple,
+        Union,
+        overload,
+    )  # noqa: E501, F401
 if True:
+
     def overload(f):  # type: ignore  # noqa: D103, F811
         return None
 
@@ -23,22 +33,22 @@ class FormLink(object):
     """Connection to a FORM process."""
 
     # The input file for FORM.
-    _INIT_FRM = get_data_path('form', 'init.frm')
+    _INIT_FRM = get_data_path("form", "init.frm")
 
     # Special keywords for communicating with FORM.
-    _END_MARK = '__END__'
+    _END_MARK = "__END__"
     _END_MARK_LEN = len(_END_MARK)
-    _PROMPT = '\n__READY__\n'
+    _PROMPT = "\n__READY__\n"
 
     def __init__(self, args=None, keep_log=False):
         # type: (Optional[Union[str, Sequence[str]]], Union[bool, int]) -> None
         """Open a connection to a FORM process."""
         self._closed = True
-        self._head = None       # type: Optional[str]
-        self._log = None        # type: Optional[MutableSequence[str]]
-        self._childpid = None   # type: Optional[int]
-        self._formpid = None    # type: Optional[int]
-        self._parentin = None   # type: Optional[PushbackReader]
+        self._head = None  # type: Optional[str]
+        self._log = None  # type: Optional[MutableSequence[str]]
+        self._childpid = None  # type: Optional[int]
+        self._formpid = None  # type: Optional[int]
+        self._parentin = None  # type: Optional[PushbackReader]
         self._parentout = None  # type: Optional[IO[str]]
         self._loggingin = None  # type: Optional[PushbackReader]
         self.open(args, keep_log)
@@ -102,10 +112,10 @@ class FormLink(object):
 
         """
         if args is None:
-            if 'FORM' in os.environ:
-                args = os.environ['FORM']
+            if "FORM" in os.environ:
+                args = os.environ["FORM"]
             else:
-                args = 'form'
+                args = "form"
         if isinstance(args, string_types):
             args = shlex.split(args)  # Split the arguments.
         elif isinstance(args, (list, tuple)):
@@ -126,9 +136,9 @@ class FormLink(object):
             os.close(fd_childout)
             os.close(fd_loggingout)
 
-            parentin = os.fdopen(fd_parentin, 'r')
-            parentout = os.fdopen(fd_parentout, 'w')
-            loggingin = os.fdopen(fd_loggingin, 'r')
+            parentin = os.fdopen(fd_parentin, "r")
+            parentout = os.fdopen(fd_parentout, "w")
+            loggingin = os.fdopen(fd_loggingin, "r")
 
             # FORM sends 'pid\n'.
             s = parentin.readline()
@@ -137,23 +147,23 @@ class FormLink(object):
                 parentin.close()
                 parentout.close()
                 loggingin.close()
-                raise IOError('failed to read the first line from FORM')
+                raise IOError("failed to read the first line from FORM")
             s = s.rstrip()
             formpid = int(s)
             # The parent must send 'pid,ppid\n'.
-            s = s + ',{0}\n'.format(os.getpid())
+            s = s + ",{0}\n".format(os.getpid())
             parentout.write(s)
             parentout.flush()
             # FORM sends 'OK' (in init.frm).
             s = parentin.read(2)
-            if s != 'OK':
+            if s != "OK":
                 os.waitpid(pid, 0)
                 parentin.close()
                 parentout.close()
                 loggingin.close()
-                raise IOError('failed to establish the connection to FORM')
+                raise IOError("failed to establish the connection to FORM")
             # Change the prompt.
-            parentout.write('#prompt {0}\n'.format(self._PROMPT.strip()))
+            parentout.write("#prompt {0}\n".format(self._PROMPT.strip()))
             # Read the first line of the FORM output.
             head = loggingin.readline().rstrip()
 
@@ -174,7 +184,7 @@ class FormLink(object):
             else:
                 self._log = None
                 # Turn off the listing of the input.
-                parentout.write('#-\n')
+                parentout.write("#-\n")
             self._childpid = pid
             self._formpid = formpid
             self._parentin = PushbackReader(parentin)
@@ -192,9 +202,9 @@ class FormLink(object):
             os.close(fd_loggingin)
             os.dup2(fd_loggingout, sys.__stdout__.fileno())
 
-            args.append('-M')
-            args.append('-pipe')
-            args.append('{0},{1}'.format(fd_childin, fd_childout))
+            args.append("-M")
+            args.append("-pipe")
+            args.append("{0},{1}".format(fd_childin, fd_childout))
             args.append(FormLink._INIT_FRM)
 
             # In Python 3.2, subprocess.Popen() on UNIX changed the default
@@ -204,10 +214,9 @@ class FormLink(object):
             if sys.version_info[0:2] < (3, 2):
                 subprocess.call(args, shell=False)
             else:
-                subprocess.call(args, shell=False,
-                                pass_fds=(fd_childin,
-                                          fd_childout,
-                                          fd_loggingout))
+                subprocess.call(
+                    args, shell=False, pass_fds=(fd_childin, fd_childout, fd_loggingout)
+                )
 
             os.close(fd_childin)
             os.close(fd_childout)
@@ -280,8 +289,10 @@ class FormLink(object):
                                 os.waitpid(self._childpid, 0)
                     else:
                         if wait(max(term, kill)):  # either term or kill is 0
-                            os.kill(self._formpid,
-                                    signal.SIGKILL if kill else signal.SIGTERM)
+                            os.kill(
+                                self._formpid,
+                                signal.SIGKILL if kill else signal.SIGTERM,
+                            )
                             os.waitpid(self._childpid, 0)
                 else:
                     os.waitpid(self._childpid, 0)
@@ -306,7 +317,8 @@ class FormLink(object):
         # type: () -> None
         """Kill the FORM process and close the connection."""
         self._close(kill=-1)  # Kill it immediately.
-#       self._close(term=-1, kill=1)
+
+    #       self._close(term=-1, kill=1)
 
     def write(self, script):
         # type: (str) -> None
@@ -317,12 +329,12 @@ class FormLink(object):
         :meth:`flush` or :meth:`read` is called.
         """
         if self._closed:
-            raise IOError('tried to write to closed connection')
+            raise IOError("tried to write to closed connection")
         script = script.strip()
         if script:
             assert self._parentout is not None
             self._parentout.write(script)
-            self._parentout.write('\n')
+            self._parentout.write("\n")
 
     def flush(self):
         # type: () -> None
@@ -333,7 +345,7 @@ class FormLink(object):
         for asynchronous execution of FORM scripts.
         """
         if self._closed:
-            raise IOError('tried to flush closed connection')
+            raise IOError("tried to flush closed connection")
         assert self._parentout is not None
         self._parentout.flush()
 
@@ -373,12 +385,16 @@ class FormLink(object):
         pass  # pragma: no cover
 
     @overload  # noqa: F811
-    def read(self, name1, name2, name3, name4, name5, name6, name7, name8):  # noqa: D102, E501
+    def read(
+        self, name1, name2, name3, name4, name5, name6, name7, name8
+    ):  # noqa: D102, E501
         # type: (str, str, str, str, str, str, str, str) -> Tuple[str, str, str, str, str, str, str, str]  # noqa: E501
         pass  # pragma: no cover
 
     @overload  # noqa: F811
-    def read(self, name1, name2, name3, name4, name5, name6, name7, name8, name9):  # noqa: D102, E501
+    def read(
+        self, name1, name2, name3, name4, name5, name6, name7, name8, name9
+    ):  # noqa: D102, E501
         # type: (str, str, str, str, str, str, str, str, str) -> Tuple[str, str, str, str, str, str, str, str, str]  # noqa: E501
         pass  # pragma: no cover
 
@@ -435,14 +451,14 @@ class FormLink(object):
         strings. Objects to be read from FORM are expressions, $-variables and
         preprocessor variables.
 
-        ========== =============================
-          name       meaning
-        ========== =============================
-          "F"        expression F
-          "$x"       $-variable $x
-          "$x[]"     factorized $-variable $x
-          "\`A'"     preprocessor variable A
-        ========== =============================
+        ======= =========================
+        name    meaning
+        ======= =========================
+        "F"     expression F
+        "$x"    $-variable $x
+        "$x[]"  factorized $-variable $x
+        "\`A'"  preprocessor variable A
+        ======= =========================
 
         Note that the communication for the reading is performed within the
         preprocessor of FORM (i.e., at compile-time), so one may need to write
@@ -484,7 +500,7 @@ class FormLink(object):
 
         """
         if self._closed:
-            raise IOError('tried to read from closed connection')
+            raise IOError("tried to read from closed connection")
 
         if len(names) == 1 and not isinstance(names[0], string_types):
             names = tuple(names[0])
@@ -501,10 +517,11 @@ class FormLink(object):
         assert self._loggingin is not None
 
         for e in names:
-            if len(e) >= 2 and e[0] == '`' and e[-1] == "'":
+            if len(e) >= 2 and e[0] == "`" and e[-1] == "'":
                 self._parentout.write(
-                    '#toexternal "{0}{1}"\n'.format(e, self._END_MARK))
-            elif len(e) >= 3 and e[0] == '$' and e[-2:] == '[]':
+                    '#toexternal "{0}{1}"\n'.format(e, self._END_MARK)
+                )
+            elif len(e) >= 3 and e[0] == "$" and e[-2:] == "[]":
                 # Special syntax "$x[]" for factorized $-variables.
                 # NOTE: (1) isfactorized($x) is zero when $x is 0 or $x has
                 #           only one factor even after FactArg is performed.
@@ -514,27 +531,31 @@ class FormLink(object):
                 #       (3) `$x[1]' is not accessible (segfault) with versions
                 #           before Sep  3 2015, if $x has only one factor and
                 #           `$x[0]' gives 1.
-                self._parentout.write((
-                    "#if `${0}[0]'\n"
-                    "#toexternal \"(%$)\",${0}[1]\n"
-                    "#do i=2,`${0}[0]'\n"
-                    "#toexternal \"*(%$)\",${0}[`i']\n"
-                    "#enddo\n"
-                    "#else\n"
-                    "#if termsin(${0})\n"
-                    "#toexternal \"%$\",${0}\n"
-                    "#else\n"
-                    "#toexternal \"(0)\"\n"
-                    "#endif\n"
-                    "#endif\n"
-                    "#toexternal \"{1}\"\n"
-                ).format(e[1:-2], self._END_MARK))
-            elif len(e) >= 1 and e[0] == '$':
                 self._parentout.write(
-                    '#toexternal "%${1}",{0}\n'.format(e, self._END_MARK))
+                    (
+                        "#if `${0}[0]'\n"
+                        '#toexternal "(%$)",${0}[1]\n'
+                        "#do i=2,`${0}[0]'\n"
+                        '#toexternal "*(%$)",${0}[`i\']\n'
+                        "#enddo\n"
+                        "#else\n"
+                        "#if termsin(${0})\n"
+                        '#toexternal "%$",${0}\n'
+                        "#else\n"
+                        '#toexternal "(0)"\n'
+                        "#endif\n"
+                        "#endif\n"
+                        '#toexternal "{1}"\n'
+                    ).format(e[1:-2], self._END_MARK)
+                )
+            elif len(e) >= 1 and e[0] == "$":
+                self._parentout.write(
+                    '#toexternal "%${1}",{0}\n'.format(e, self._END_MARK)
+                )
             else:
                 self._parentout.write(
-                    '#toexternal "%E{1}",{0}\n'.format(e, self._END_MARK))
+                    '#toexternal "%E{1}",{0}\n'.format(e, self._END_MARK)
+                )
         self._parentout.write('#redefine FORMLINKLOOPVAR "0"')
         self._parentout.write(self._PROMPT)
         self._parentout.flush()
@@ -547,35 +568,35 @@ class FormLink(object):
                 i = out.find(self._END_MARK, out_start)
                 if i >= 0:
                     result.append(out[:i])
-                    out = out[i + self._END_MARK_LEN:]
+                    out = out[i + self._END_MARK_LEN :]
                     out_start = 0
                     break
                 out_start = max(len(out) - self._END_MARK_LEN, 0)
 
-                r, _, _ = select.select((self._parentin, self._loggingin),
-                                        (), ())
+                r, _, _ = select.select((self._parentin, self._loggingin), (), ())
                 if self._loggingin in r:
                     s = self._loggingin.read()
                     if s:
-                        i = s.rfind('\n')
+                        i = s.rfind("\n")
                         if i >= 0:
-                            msgs = s[:i].split('\n')
+                            msgs = s[:i].split("\n")
                             if self._log is not None:
                                 self._log.extend(msgs)
                             for msg in msgs:
-                                if (msg.find('-->') >= 0 or
-                                        msg.find('==>') >= 0):
+                                if msg.find("-->") >= 0 or msg.find("==>") >= 0:
                                     if self._log:
-                                        msg += '\n'
-                                        msg += '\n'.join(self._log)
+                                        msg += "\n"
+                                        msg += "\n".join(self._log)
                                     self.close()
                                     raise FormError(msg)
-                        self._loggingin.unread(s[i + 1:])
+                        self._loggingin.unread(s[i + 1 :])
                 if self._parentin in r:
-                    out += (self._parentin.read()
-                            .replace('\n', '')
-                            .replace('\\', '')
-                            .replace(' ', ''))
+                    out += (
+                        self._parentin.read()
+                        .replace("\n", "")
+                        .replace("\\", "")
+                        .replace(" ", "")
+                    )
 
         self._parentin.unread(out)
 
@@ -604,14 +625,27 @@ class FormLink(object):
         # type: () -> int
         """Return the build/revision date as an integer "yyyymmdd"."""
         import re
+
         if self._head:
-            ma = re.search(r'(?<=\()(.*)(?=\))', self._head)
+            ma = re.search(r"(?<=\()(.*)(?=\))", self._head)
             if ma:
-                s = re.split(r'[, ]+', ma.group(0))
+                s = re.split(r"[, ]+", ma.group(0))
                 if len(s) >= 3:
                     # month
-                    month_names = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec')
+                    month_names = (
+                        "Jan",
+                        "Feb",
+                        "Mar",
+                        "Apr",
+                        "May",
+                        "Jun",
+                        "Jul",
+                        "Aug",
+                        "Sep",
+                        "Oct",
+                        "Nov",
+                        "Dec",
+                    )
                     if s[0] in month_names:
                         m = month_names.index(s[0]) + 1
                         # date
@@ -625,7 +659,7 @@ class FormLink(object):
                                         # Return an integer as "yyyymmdd".
                                         return y * 10000 + m * 100 + d
             raise ValueError('failed to parse "{0}"'.format(self._head))
-        raise ValueError('no first line')
+        raise ValueError("no first line")
 
 
 class FormError(RuntimeError):

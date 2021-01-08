@@ -87,24 +87,24 @@ References
 .. _CHANGELOG: https://github.com/tueda/python-form/blob/master/CHANGELOG.md
 .. _LICENCE: https://github.com/tueda/python-form/blob/master/LICENCE.md
 
-.. [1] J.A.M. Vermaseren,
-       New features of FORM,
-       `arXiv:math-ph/0010025
-       <https://arxiv.org/abs/math-ph/0010025>`_.
-.. [2] J. Kuipers, T. Ueda, J.A.M. Vermaseren and J. Vollinga,
-       FORM version 4.0,
-       `Comput.Phys.Commun. 184 (2013) 1453-1467
-       <https://dx.doi.org/10.1016/j.cpc.2012.12.028>`_,
-       `arXiv:1203.6543 [cs.SC]
-       <https://arxiv.org/abs/1203.6543>`_.
-.. [3] https://github.com/vermaseren/form
-.. [4] Feng Feng and Rolf Mertig,
-       FormLink/FeynCalcFormLink : Embedding FORM in Mathematica and FeynCalc,
-       `arXiv:1212.3522 [hep-ph]
-       <https://arxiv.org/abs/1212.3522>`_.
-.. [5] M. Tentyukov and J.A.M. Vermaseren,
-       Extension of the functionality of the symbolic program FORM by external software,
-       `Comput.Phys.Commun. 176 (2007) 385-405
-       <https://dx.doi.org/10.1016/j.cpc.2006.11.007>`_,
-       `arXiv:cs/0604052
-       <https://arxiv.org/abs/cs/0604052>`_.
+.. [1]  J.A.M. Vermaseren,
+        New features of FORM,
+        `arXiv:math-ph/0010025
+        <https://arxiv.org/abs/math-ph/0010025>`_.
+.. [2]  J. Kuipers, T. Ueda, J.A.M. Vermaseren and J. Vollinga,
+        FORM version 4.0,
+        `Comput.Phys.Commun. 184 (2013) 1453-1467
+        <https://dx.doi.org/10.1016/j.cpc.2012.12.028>`_,
+        `arXiv:1203.6543 [cs.SC]
+        <https://arxiv.org/abs/1203.6543>`_.
+.. [3]  https://github.com/vermaseren/form
+.. [4]  Feng Feng and Rolf Mertig,
+        FormLink/FeynCalcFormLink : Embedding FORM in Mathematica and FeynCalc,
+        `arXiv:1212.3522 [hep-ph]
+        <https://arxiv.org/abs/1212.3522>`_.
+.. [5]  M. Tentyukov and J.A.M. Vermaseren,
+        Extension of the functionality of the symbolic program FORM by external software,
+        `Comput.Phys.Commun. 176 (2007) 385-405
+        <https://dx.doi.org/10.1016/j.cpc.2006.11.007>`_,
+        `arXiv:cs/0604052
+        <https://arxiv.org/abs/cs/0604052>`_.
