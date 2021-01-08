@@ -71,25 +71,10 @@ travis_test_install() {
   # Get python-form installed.
   pip install .
 
-  # For testing/code coverage.
-  #case "$TRAVIS_PYTHON_VERSION" in
-  #  2.6)
-  #    travis_retry pip install colorama==0.3.9 coverage nose-timer==0.7.0
-  #    ;;
-  #  3.2)
-  #    travis_retry pip install coverage==3.7.1 nose-timer
-  #    ;;
-  #  *)
-  #    travis_retry pip install coverage nose-timer
-  #    ;;
-  #esac
   case "$TRAVIS_PYTHON_VERSION" in
     2.6)
       travis_retry pip install 'colorama<0.4.0' 'idna<2.8'
-      # travis_retry pip install 'nose-timer<1.0.0'  # BAD ??
-      # travis_retry pip install 'nose-timer<0.7.3'  # BAD ??
-      #travis_retry pip install 'nose-timer<0.7.2'  # BAD??
-      travis_retry pip install 'nose-timer<0.7.1'  # ??
+      travis_retry pip install 'nose-timer<0.7.1'
       ;;
     3.2)
       travis_retry pip install 'coverage<4.0.0' 'coveralls<2.0.0'
@@ -98,7 +83,7 @@ travis_test_install() {
       travis_retry pip install 'colorama<0.4.2'
       ;;
     pypy)
-      travis_retry pip install 'cryptography<3.3.0'  # OK ??
+      travis_retry pip install 'cryptography<3.3.0'
       ;;
   esac
   travis_retry pip install coveralls rednose nose-timer
