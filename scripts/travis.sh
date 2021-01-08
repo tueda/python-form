@@ -83,6 +83,20 @@ travis_test_install() {
   #    travis_retry pip install coverage nose-timer
   #    ;;
   #esac
+  case "$TRAVIS_PYTHON_VERSION" in
+    2.6)
+      travis_retry pip install colorama<0.4.0
+      ;;
+    3.2)
+      travis_retry pip install coverage<4.0.0
+      ;;
+    3.4)
+      travis_retry pip install colorama<0.4.2
+      ;;
+    pypy)
+      travis_retry pip install coveralls<2.0.0
+      ;;
+  esac
   travis_retry pip install coveralls rednose nose-timer
 }
 
