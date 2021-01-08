@@ -87,7 +87,8 @@ travis_test_install() {
     2.6)
       travis_retry pip install 'colorama<0.4.0' 'idna<2.8'
       # travis_retry pip install 'nose-timer<1.0.0'  # BAD ??
-      travis_retry pip install 'nose-timer<0.7.3'  # ??
+      # travis_retry pip install 'nose-timer<0.7.3'  # BAD ??
+      travis_retry pip install 'nose-timer<0.7.2'  # ??
       ;;
     3.2)
       travis_retry pip install 'coverage<4.0.0' 'coveralls<2.0.0'
@@ -98,7 +99,8 @@ travis_test_install() {
     pypy)
       #travis_retry pip install 'cryptography<3.0.0'  # OK ??
       # travis_retry pip install 'cryptography<3.1.0'  # OK ??
-      travis_retry pip install 'cryptography<3.3.0'  # ??
+      # travis_retry pip install 'cryptography<3.3.0'  # OK ??
+      travis_retry pip install 'cryptography<3.3.1'  # ??
       ;;
   esac
   travis_retry pip install coveralls rednose nose-timer
