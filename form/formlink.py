@@ -116,8 +116,9 @@ class FormLink(object):
                 args = os.environ["FORM"]
             else:
                 args = "form"
+
         if isinstance(args, string_types):
-            args = shlex.split(args)  # Split the arguments.
+            args = shlex.split(str(args))  # Split the arguments.
         elif isinstance(args, (list, tuple)):
             args = list(args)  # As a modifiable mutable object.
         else:
